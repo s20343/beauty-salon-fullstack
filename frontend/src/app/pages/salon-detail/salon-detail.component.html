@@ -16,8 +16,17 @@
     <!-- Top Action Buttons -->
     <div class="header-actions">
       <button class="back-btn" routerLink="/salons">← Back to Salons</button>
-      <button class="edit-btn" [routerLink]="['/salons', salon.id, 'edit']">Edit Details</button>
 
+      <div class="action-group">
+        <a *ngIf="salon.address"
+           [href]="getGoogleMapsUrl()"
+           target="_blank"
+           class="map-btn">
+          🗺️ Show on Map
+        </a>
+
+        <button class="edit-btn" [routerLink]="['/salons', salon.id, 'edit']">Edit Details</button>
+      </div>
     </div>
 
     <div class="title-section">

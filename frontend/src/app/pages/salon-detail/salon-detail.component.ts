@@ -36,7 +36,7 @@ export class SalonDetailComponent implements OnInit {
         next: (data) => {
           this.salon = data;
           this.isLoading = false;
-          this.cdr.detectChanges();//bug fix
+          this.cdr.detectChanges(); //bug fix
         },
         error: (err) => {
           console.error(err);
@@ -46,5 +46,15 @@ export class SalonDetailComponent implements OnInit {
         },
       });
     });
+  }
+
+  getGoogleMapsUrl(): string {
+    if (!this.salon) {
+      return '#';
+    }
+    const searchParts = [this.salon.name, this.salon.address, this.salon.district, 'Warsaw'];
+    const query = searchParts.filter((part) => part && part.trim() !== '').join(', ');
+
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
   }
 }

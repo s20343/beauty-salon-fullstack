@@ -34,3 +34,29 @@ h3 { margin-top: 0; color: #2d3748; font-size: 20px; margin-bottom: 15px;}
 .tags { display: flex; gap: 10px; flex-wrap: wrap; }
 .tag { background: #ebf4ff; color: #3182ce; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 500;}
 .text-muted { color: #a0aec0; font-style: italic; }
+/* Group for the right-side buttons */
+.action-group {
+  display: flex;
+  gap: 10px;
+}
+
+/* Map Button Styling */
+.map-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: white;
+  color: #38a169; /* Green color to represent maps/locations */
+  border: 1px solid #c6f6d5;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.map-btn:hover {
+  background: #f0fff4;
+  transform: translateY(-2px);
+}
