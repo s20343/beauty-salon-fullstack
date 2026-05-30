@@ -1,0 +1,33 @@
+.edit-container { max-width: 800px; margin: 0 auto; }
+.content-box { background: white; padding: 40px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+
+h2 { margin-top: 0; color: #1a202c; font-size: 24px; margin-bottom: 25px; }
+
+.edit-form { display: flex; flex-direction: column; gap: 20px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+.form-group-row { display: flex; gap: 20px; }
+.form-group label { font-size: 13px; font-weight: bold; color: #4a5568; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.form-input {
+  padding: 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 15px;
+  color: #2d3748;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.form-input:focus { border-color: #3182ce; outline: none; box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1); }
+
+hr { border: none; border-top: 1px solid #e2e8f0; margin: 30px 0; }
+
+.button-group { display: flex; justify-content: flex-end; gap: 15px; }
+.cancel-btn, .save-btn { padding: 12px 24px; border: none; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; }
+.cancel-btn { background: white; color: #4a5568; border: 1px solid #cbd5e0; }
+.cancel-btn:hover { background: #f7fafc; }
+.save-btn { background: #3182ce; color: white; box-shadow: 0 4px 6px rgba(49, 130, 206, 0.2); }
+.save-btn:hover:not(:disabled) { background: #2b6cb0; transform: translateY(-2px); }
+.save-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+.loading-state, .error-state { text-align: center; padding: 50px; font-size: 18px; border-radius: 8px; border: 1px solid #e2e8f0; background: white;}
+.error-state { color: #e53e3e; background: #fff5f5; border-color: #feb2b2; }

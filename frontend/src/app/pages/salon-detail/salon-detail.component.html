@@ -1,0 +1,61 @@
+<div class="detail-container">
+
+
+  <div *ngIf="isLoading" class="loading-state">
+    ⏳ Loading salon details...
+  </div>
+
+
+  <div *ngIf="errorMessage" class="error-state">
+    ⚠️ {{ errorMessage }}
+  </div>
+
+
+  <div *ngIf="!isLoading && !errorMessage && salon" class="content-box">
+
+    <!-- Top Action Buttons -->
+    <div class="header-actions">
+      <button class="back-btn" routerLink="/salons">← Back to Salons</button>
+      <button class="edit-btn" [routerLink]="['/salons', salon.id, 'edit']">Edit Details</button>
+
+    </div>
+
+    <div class="title-section">
+      <div>
+        <h1>{{ salon.name }}</h1>
+        <p class="location">📍 {{ salon.address }}, {{ salon.district }}</p>
+      </div>
+      <span class="badge price-badge">{{ salon.priceRange }}</span>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-label">Rating</span>
+        <span class="info-value rating">⭐ {{ salon.rating | number:'1.1-1' }} ({{ salon.reviewCount }} reviews)</span>
+      </div>
+
+      <div class="info-item" *ngIf="salon.phoneNumber">
+        <span class="info-label">Phone</span>
+        <span class="info-value">{{ salon.phoneNumber }}</span>
+      </div>
+
+      <div class="info-item" *ngIf="salon.website">
+        <span class="info-label">Website</span>
+        <span class="info-value"><a [href]="salon.website" target="_blank">Visit Site</a></span>
+      </div>
+    </div>
+
+    <hr>
+
+    <h3>Services Offered</h3>
+    <div class="tags">
+      <span class="tag" *ngFor="let service of salon.servicesOffered">{{ service }}</span>
+    </div>
+
+    <hr>
+
+    <h3>About this Salon</h3>
+    <p class="description-text">{{ salon.description }}</p>
+
+  </div>
+</div>

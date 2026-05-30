@@ -1,0 +1,11 @@
+:host {
+  display: block;
+  background-color: #f7fafc;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.main-container {
+  padding: 40px 50px;
+  max-width: 1400px;
+  margin: 0 auto;
+}

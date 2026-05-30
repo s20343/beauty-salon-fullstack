@@ -1,0 +1,45 @@
+<div class="layout">
+  <!-- LEFT SIDEBAR: FILTERS -->
+  <aside class="sidebar">
+    <h3>Search</h3>
+    <input type="text" class="search-input" placeholder="Search by keyword..."
+           [(ngModel)]="searchText" (input)="onSearch()">
+
+    <div class="filter-group">
+      <label>Location (District)</label>
+      <select class="search-input" [(ngModel)]="searchDistrict" (change)="onSearch()">
+        <option value="">All Districts</option>
+        <option value="Śródmieście">Śródmieście</option>
+        <option value="Mokotów">Mokotów</option>
+        <option value="Wola">Wola</option>
+      </select>
+    </div>
+  </aside>
+
+  <!-- RIGHT SIDE: GRID -->
+  <section class="content">
+    <div class="results-header">
+      <span>Showing {{filteredSalons.length}} results</span>
+    </div>
+
+    <div class="grid">
+      <div class="card" *ngFor="let salon of filteredSalons" [routerLink]="['/salons', salon.id]">
+        <div class="card-img">
+          <span class="badge">{{ salon.priceRange }}</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">{{ salon.name }}</h3>
+          <p class="card-address">{{ salon.address }}, {{salon.district}}</p>
+          <div class="card-footer">
+            <span class="rating">⭐ {{ salon.rating | number:'1.1-1' }}</span>
+            <span class="reviews">{{ salon.reviewCount }} reviews</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="filteredSalons.length === 0" class="no-results">
+      No salons found matching your filters.
+    </div>
+  </section>
+</div>
