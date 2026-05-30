@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { SalonDetail, SalonRequest, SalonSummary } from '../model/salon.model';
 
 @Injectable({
   providedIn: 'root',
@@ -10,19 +11,19 @@ export class SalonService {
 
   constructor(private http: HttpClient) {}
 
-  getSalons(district?: string): Observable<any[]> {
+  getSalons(district?: string): Observable<SalonSummary[]> {
     let url = this.apiUrl;
     if (district) {
       url += `?district=${district}`;
     }
-    return this.http.get<any[]>(url);
+    return this.http.get<SalonSummary[]>(url);
   }
 
-  getSalonById(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  getSalonById(id: number): Observable<SalonDetail> {
+    return this.http.get<SalonDetail>(`${this.apiUrl}/${id}`);
   }
 
-  updateSalon(id: number, data: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, data);
+  updateSalon(id: number, data: Partial<SalonRequest>): Observable<SalonDetail> {
+    return this.http.put<SalonDetail>(`${this.apiUrl}/${id}`, data);
   }
 }
