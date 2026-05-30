@@ -35,9 +35,7 @@ class SalonControllerTest {
     @MockitoBean
     private SalonService salonService;
 
-    // -------------------------
-    // GET ALL
-    // -------------------------
+
     @Test
     void shouldReturnAllSalons() throws Exception {
 
@@ -59,9 +57,6 @@ class SalonControllerTest {
                 .andExpect(jsonPath("$[0].district").value("Mokotow"));
     }
 
-    // -------------------------
-    // GET BY ID
-    // -------------------------
     @Test
     void shouldReturnSalonById() throws Exception {
 
@@ -82,9 +77,7 @@ class SalonControllerTest {
                 .andExpect(jsonPath("$.district").value("Wola"));
     }
 
-    // -------------------------
-    // 404 NOT FOUND
-    // -------------------------
+
     @Test
     void shouldReturn404WhenSalonNotFound() throws Exception {
 
@@ -95,9 +88,7 @@ class SalonControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    // -------------------------
-    // UPDATE
-    // -------------------------
+
     @Test
     void shouldUpdateSalon() throws Exception {
 
@@ -130,9 +121,6 @@ class SalonControllerTest {
                 .andExpect(jsonPath("$.district").value("Wola"));
     }
 
-    // -------------------------
-    // UPDATE NOT FOUND
-    // -------------------------
     @Test
     void shouldReturn404WhenUpdatingMissingSalon() throws Exception {
 
@@ -155,10 +143,7 @@ class SalonControllerTest {
                 )
                 .andExpect(status().isNotFound());
     }
-
-    // -------------------------
-    // VALIDATION ERROR
-    // -------------------------
+    
     @Test
     void shouldReturn400WhenInvalidRequest() throws Exception {
 
