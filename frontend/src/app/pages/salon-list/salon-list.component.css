@@ -16,3 +16,90 @@
 .card-footer { display: flex; justify-content: space-between; border-top: 1px solid #edf2f7; padding-top: 10px; font-size: 14px; }
 .rating { color: #d69e2e; font-weight: bold; }
 .no-results { text-align: center; padding: 40px; color: #718096; }
+/* Sidebar Advanced Styling */
+.filter-section {
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #edf2f7;
+}
+.filter-section.no-border { border-bottom: none; }
+.section-title {
+  display: block;
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+/* Slider Styling */
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.slider-value {
+  font-size: 13px;
+  color: #d69e2e;
+  font-weight: bold;
+}
+.range-slider {
+  width: 100%;
+  cursor: pointer;
+  accent-color: #3182ce;
+  margin-top: 5px;
+}
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #a0aec0;
+  margin-top: 5px;
+}
+
+/* Custom Checkbox Styling */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  font-size: 14px;
+  color: #4a5568;
+  user-select: none;
+}
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+.checkmark {
+  height: 18px;
+  width: 18px;
+  background-color: #edf2f7;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  margin-right: 10px;
+  transition: 0.2s;
+  position: relative;
+}
+.checkbox-container:hover input ~ .checkmark { background-color: #e2e8f0; }
+.checkbox-container input:checked ~ .checkmark { background-color: #3182ce; border-color: #3182ce; }
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 2px;
+  width: 4px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.checkbox-container input:checked ~ .checkmark:after { display: block; }

@@ -1,25 +1,75 @@
 <div class="layout">
-  <!-- LEFT SIDEBAR: FILTERS -->
-  <aside class="sidebar">
-    <h3>Search</h3>
-    <input type="text" class="search-input" placeholder="Search by keyword..."
-           [(ngModel)]="searchText" (input)="onSearch()">
 
-    <div class="filter-group">
-      <label>Location (District)</label>
+  <!-- LEFT SIDEBAR: ADVANCED FILTERS -->
+  <aside class="sidebar">
+
+    <!-- 1. Text Search -->
+    <div class="filter-section">
+      <label class="section-title">Search by keyword</label>
+      <input type="text" class="search-input" placeholder="Salon name..."
+             [(ngModel)]="searchText" (input)="onSearch()">
+    </div>
+
+    <!-- 2. Location Dropdown -->
+    <div class="filter-section">
+      <label class="section-title">Location</label>
       <select class="search-input" [(ngModel)]="searchDistrict" (change)="onSearch()">
         <option value="">All Districts</option>
         <option value="Śródmieście">Śródmieście</option>
         <option value="Mokotów">Mokotów</option>
         <option value="Wola">Wola</option>
+        <option value="Żoliborz">Żoliborz</option>
+        <option value="Praga-Południe">Praga-Południe</option>
       </select>
     </div>
+
+    <!-- 3. Minimum Rating Slider -->
+    <div class="filter-section">
+      <div class="slider-header">
+        <label class="section-title">Minimum Rating</label>
+        <span class="slider-value">⭐ {{ minRating | number:'1.1-1' }}+</span>
+      </div>
+      <input type="range" class="range-slider" min="0" max="5" step="0.5"
+             [(ngModel)]="minRating" (input)="onSearch()">
+      <div class="slider-labels">
+        <span>0</span>
+        <span>5.0</span>
+      </div>
+    </div>
+
+    <!-- 4. Price Range Checkboxes -->
+    <div class="filter-section no-border">
+      <label class="section-title">Price Range</label>
+
+      <div class="checkbox-group">
+        <label class="checkbox-container">
+          <input type="checkbox" [(ngModel)]="priceFilters['CHEAP']" (change)="onSearch()">
+          <span class="checkmark"></span> Cheap
+        </label>
+
+        <label class="checkbox-container">
+          <input type="checkbox" [(ngModel)]="priceFilters['MODERATE']" (change)="onSearch()">
+          <span class="checkmark"></span> Moderate
+        </label>
+
+        <label class="checkbox-container">
+          <input type="checkbox" [(ngModel)]="priceFilters['EXPENSIVE']" (change)="onSearch()">
+          <span class="checkmark"></span> Expensive
+        </label>
+
+        <label class="checkbox-container">
+          <input type="checkbox" [(ngModel)]="priceFilters['LUXURY']" (change)="onSearch()">
+          <span class="checkmark"></span> Luxury
+        </label>
+      </div>
+    </div>
+
   </aside>
 
-  <!-- RIGHT SIDE: GRID -->
+  <!-- RIGHT SIDE: GRID (Keep your existing grid code here!) -->
   <section class="content">
     <div class="results-header">
-      <span>Showing {{filteredSalons.length}} results</span>
+      <span>Showing <strong>{{filteredSalons.length}}</strong> results</span>
     </div>
 
     <div class="grid">
@@ -39,7 +89,9 @@
     </div>
 
     <div *ngIf="filteredSalons.length === 0" class="no-results">
-      No salons found matching your filters.
+      <div style="font-size: 40px; margin-bottom: 15px;">🔍</div>
+      <h3>No salons found</h3>
+      <p>Try adjusting your filters to see more results.</p>
     </div>
   </section>
 </div>
