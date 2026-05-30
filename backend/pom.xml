@@ -13,7 +13,7 @@
     </parent>
 
     <groupId>batu</groupId>
-    <artifactId>BeautySalon</artifactId>
+    <artifactId>backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>BeautySalon</name>
 
