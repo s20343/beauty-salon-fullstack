@@ -8,27 +8,27 @@ import { SalonDetail, SalonRequest, SalonSummary } from '../model/salon.model';
   providedIn: 'root',
 })
 export class SalonService {
-
   private apiUrl = 'http://localhost:8080/api/salons';
-
   private salonsCache: SalonSummary[] | null = null;
 
   constructor(private http: HttpClient) {}
 
-  getSalons(district?: string): Observable<SalonSummary[]> {
+  getSalons(district?: string, serviceType?: string): Observable<SalonSummary[]> {
+    let url = this.apiUrl;
+    const params = [];
 
-    if (district) {
-      return this.http.get<SalonSummary[]>(`${this.apiUrl}?district=${district}`);
-    }
-    if (this.salonsCache) {
-      return of(this.salonsCache);
-    }
+    if (district && district !== '') params.push(`district=${district}`);
+    if (serviceType && serviceType !== '') params.push(`service=${serviceType}`);
 
-    return this.http.get<SalonSummary[]>(this.apiUrl).pipe(
-      tap((data) => {
-        this.salonsCache = data;
-      }),
-    );
+    if (params.length > 0) {
+      url += '?' + params.join('&');
+      return this.http.get<SalonSummary[]>(url);
+    }
+    if (this.salonsCache) return of(this.salonsCache);
+
+    return this.http
+      .get<SalonSummary[]>(this.apiUrl)
+      .pipe(tap((data) => (this.salonsCache = data)));
   }
 
   getSalonById(id: number): Observable<SalonDetail> {
@@ -38,7 +38,6 @@ export class SalonService {
   updateSalon(id: number, data: Partial<SalonRequest>): Observable<SalonDetail> {
     return this.http.put<SalonDetail>(`${this.apiUrl}/${id}`, data).pipe(
       tap((updatedSalonFromBackend) => {
-
         if (this.salonsCache !== null) {
           for (let i = 0; i < this.salonsCache.length; i++) {
             if (this.salonsCache[i].id === id) {

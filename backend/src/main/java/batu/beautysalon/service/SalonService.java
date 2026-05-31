@@ -25,14 +25,21 @@ public class SalonService {
     public List<SalonSummaryDto> getAllSalons(String district, String service) {
         List<Salon> salons;
 
-        if (district != null && !district.isBlank()) {
+        boolean hasDistrict = district != null && !district.isBlank();
+        boolean hasService = service != null && !service.isBlank();
+
+        if (hasDistrict && hasService) {
+            salons = salonRepository.findByDistrictIgnoreCaseAndServicesOfferedContainingIgnoreCase(district, service);
+        }
+        else if (hasDistrict) {
             salons = salonRepository.findByDistrictIgnoreCase(district);
-        } else if (service != null && !service.isBlank()) {
+        }
+        else if (hasService) {
             salons = salonRepository.findByServicesOfferedContainingIgnoreCase(service);
-        } else {
+        }
+        else {
             salons = salonRepository.findAll();
         }
-
         return salons.stream()
                 .map(salonMapper::toSummaryDto)
                 .collect(Collectors.toList());

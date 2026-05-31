@@ -6,6 +6,6 @@ import java.util.List;
 public interface SalonRepository extends JpaRepository<Salon, Long> {
 
     List<Salon> findByDistrictIgnoreCase(String district);
-
     List<Salon> findByServicesOfferedContainingIgnoreCase(String service);
+    List<Salon> findByDistrictIgnoreCaseAndServicesOfferedContainingIgnoreCase(String district, String service);
 }

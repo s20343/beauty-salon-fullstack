@@ -3,20 +3,22 @@
   <!-- LEFT SIDEBAR -->
   <aside class="sidebar">
 
+    <!-- FRONTEND FILTER: Text Search -->
     <div class="filter-section">
-      <label class="section-title">Search by keyword</label>
+      <label class="section-title">Search by salon name</label>
       <input type="text"
              class="search-input"
              placeholder="Salon name..."
              [(ngModel)]="searchText"
-             (input)="onSearch()">
+             (input)="applyFrontendFilters()">
     </div>
 
+    <!-- BACKEND FILTER: District -->
     <div class="filter-section">
       <label class="section-title">Location</label>
       <select class="search-input"
               [(ngModel)]="searchDistrict"
-              (change)="onSearch()">
+              (change)="onBackendFilterChange()">
         <option value="">All Districts</option>
         <option value="Śródmieście">Śródmieście</option>
         <option value="Mokotów">Mokotów</option>
@@ -26,60 +28,56 @@
       </select>
     </div>
 
+    <!--BACKEND FILTER: Service Type -->
+    <div class="filter-section">
+      <label class="section-title">Service</label>
+      <select class="search-input"
+              [(ngModel)]="searchServiceType"
+              (change)="onBackendFilterChange()">
+        <option value="">All Services</option>
+        <option value="Hair">Hair</option>
+        <option value="Nails">Nails</option>
+        <option value="Makeup">Makeup</option>
+        <option value="Massage">Massage</option>
+      </select>
+    </div>
+
+    <!-- FRONTEND FILTER: Rating -->
     <div class="filter-section">
       <div class="slider-header">
         <label class="section-title">Minimum Rating</label>
         <span class="slider-value">⭐ {{ minRating | number:'1.1-1' }}+</span>
       </div>
-
-      <input type="range"
-             class="range-slider"
-             min="0"
-             max="5"
-             step="0.5"
+      <input type="range" class="range-slider" min="0" max="5" step="0.5"
              [(ngModel)]="minRating"
-             (input)="onSearch()">
-
+             (input)="applyFrontendFilters()">
       <div class="slider-labels">
-        <span>0</span>
-        <span>5.0</span>
+        <span>0</span><span>5.0</span>
       </div>
     </div>
 
+    <!-- FRONTEND FILTER: Price -->
     <div class="filter-section no-border">
       <label class="section-title">Price Range</label>
-
       <div class="checkbox-group">
         <label class="checkbox-container">
-          <input type="checkbox"
-                 [(ngModel)]="priceFilters['CHEAP']"
-                 (change)="onSearch()">
+          <input type="checkbox" [(ngModel)]="priceFilters['CHEAP']" (change)="applyFrontendFilters()">
           <span class="checkmark"></span> Cheap
         </label>
-
         <label class="checkbox-container">
-          <input type="checkbox"
-                 [(ngModel)]="priceFilters['MODERATE']"
-                 (change)="onSearch()">
+          <input type="checkbox" [(ngModel)]="priceFilters['MODERATE']" (change)="applyFrontendFilters()">
           <span class="checkmark"></span> Moderate
         </label>
-
         <label class="checkbox-container">
-          <input type="checkbox"
-                 [(ngModel)]="priceFilters['EXPENSIVE']"
-                 (change)="onSearch()">
+          <input type="checkbox" [(ngModel)]="priceFilters['EXPENSIVE']" (change)="applyFrontendFilters()">
           <span class="checkmark"></span> Expensive
         </label>
-
         <label class="checkbox-container">
-          <input type="checkbox"
-                 [(ngModel)]="priceFilters['LUXURY']"
-                 (change)="onSearch()">
+          <input type="checkbox" [(ngModel)]="priceFilters['LUXURY']" (change)="applyFrontendFilters()">
           <span class="checkmark"></span> Luxury
         </label>
       </div>
     </div>
-
   </aside>
 
   <!-- RIGHT CONTENT -->

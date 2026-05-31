@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { SalonService } from '../../service/salon.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-salon-list',
@@ -14,13 +15,15 @@ import { SalonService } from '../../service/salon.service';
 export class SalonListComponent implements OnInit {
   salons: any[] = [];
   filteredSalons: any[] = [];
+  isLoading = false;
 
-  isLoading = false; // FIXED
-
-  searchText = '';
+  // Backend filters
   searchDistrict = '';
-  minRating: number = 0;
+  searchServiceType = '';
 
+  // Frontend filters
+  searchText = '';
+  minRating: number = 0;
   priceFilters: { [key: string]: boolean } = {
     CHEAP: false,
     MODERATE: false,
@@ -28,20 +31,24 @@ export class SalonListComponent implements OnInit {
     LUXURY: false,
   };
 
-  constructor(private salonService: SalonService) {}
+  constructor(
+    private salonService: SalonService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit() {
-    this.loadSalons();
+    this.onBackendFilterChange();
   }
 
-  loadSalons() {
+  onBackendFilterChange() {
     this.isLoading = true;
 
-    this.salonService.getSalons().subscribe({
-      next: (data) => {
-        this.salons = data;
-        this.filteredSalons = data;
+    this.salonService.getSalons(this.searchDistrict, this.searchServiceType).subscribe({
+      next: (dataFromBackend) => {
+        this.salons = dataFromBackend;
+        this.applyFrontendFilters();
         this.isLoading = false;
+        this.cdr.detectChanges();//bugfix
       },
       error: () => {
         this.salons = [];
@@ -51,21 +58,14 @@ export class SalonListComponent implements OnInit {
     });
   }
 
-  onSearch() {
+  applyFrontendFilters() {
     this.filteredSalons = this.salons.filter((s) => {
-      const matchText =
-        s.name.toLowerCase().includes(this.searchText.toLowerCase()) ||
-        s.district.toLowerCase().includes(this.searchText.toLowerCase());
-
-      const matchDistrict = this.searchDistrict === '' || s.district === this.searchDistrict;
-
+      const matchText = s.name.toLowerCase().includes(this.searchText.toLowerCase());
       const matchRating = (s.rating || 0) >= this.minRating;
-
       const selectedPrices = Object.keys(this.priceFilters).filter((k) => this.priceFilters[k]);
-
       const matchPrice = selectedPrices.length === 0 || selectedPrices.includes(s.priceRange);
 
-      return matchText && matchDistrict && matchRating && matchPrice;
+      return matchText && matchRating && matchPrice;
     });
   }
 }
