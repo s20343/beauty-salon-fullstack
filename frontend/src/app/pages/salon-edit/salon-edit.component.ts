@@ -60,6 +60,7 @@ export class SalonEditComponent implements OnInit {
     this.salonService.updateSalon(this.salonId, this.salonData).subscribe({
       next: () => {
         this.router.navigate(['/salons', this.salonId]);
+
       },
       error: (err) => {
         this.isSaving = false;
