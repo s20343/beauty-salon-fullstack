@@ -122,3 +122,7 @@ Three pages (`SalonList`, `SalonDetail`, `SalonEdit`) and a shared `Navbar`. The
 - Persist filter state in URL query params so results are shareable and the back button restores the previous filter state
 - Add pagination to the salon list
 - Improve the Angular project structure and code readability
+
+  ## TODO
+- [ ] Add authentication (JWT login)
+- [ ] Add pagination to salon list
