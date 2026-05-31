@@ -1,11 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { ChangeDetectorRef } from '@angular/core';
-
 import { SalonService } from '../../service/salon.service';
-import { SalonSummary, PriceRange } from '../../model/salon.model';
+import { SalonSummary } from '../../model/salon.model';
 
 @Component({
   selector: 'app-salon-list',
@@ -15,10 +13,8 @@ import { SalonSummary, PriceRange } from '../../model/salon.model';
   styleUrls: ['./salon-list.component.css'],
 })
 export class SalonListComponent implements OnInit {
-  // ✅ properly typed data
   salons: SalonSummary[] = [];
   filteredSalons: SalonSummary[] = [];
-
   isLoading = false;
 
   // Backend filters
@@ -27,15 +23,16 @@ export class SalonListComponent implements OnInit {
 
   // Frontend filters
   searchText = '';
-  minRating = 0;
-
-  // ✅ strong typing using PriceRange union
-  priceFilters: Record<PriceRange, boolean> = {
+  minRating: number = 0;
+  priceFilters: { [key: string]: boolean } = {
     CHEAP: false,
     MODERATE: false,
     EXPENSIVE: false,
     LUXURY: false,
   };
+
+  // Frontend sort
+  sortBy: 'none' | 'rating' | 'reviewCount' = 'none';
 
   constructor(
     private salonService: SalonService,
@@ -50,12 +47,10 @@ export class SalonListComponent implements OnInit {
     this.isLoading = true;
 
     this.salonService.getSalons(this.searchDistrict, this.searchServiceType).subscribe({
-      next: (dataFromBackend: SalonSummary[]) => {
+      next: (dataFromBackend) => {
         this.salons = dataFromBackend;
         this.applyFrontendFilters();
         this.isLoading = false;
-
-        // ⚠️ only needed because of earlier change detection issue
         this.cdr.detectChanges();
       },
       error: () => {
@@ -67,19 +62,24 @@ export class SalonListComponent implements OnInit {
   }
 
   applyFrontendFilters() {
-    const selectedPrices = Object.entries(this.priceFilters)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([price]) => price as PriceRange);
-
-    this.filteredSalons = this.salons.filter((s: SalonSummary) => {
+    const filtered = this.salons.filter((s) => {
       const matchText = s.name.toLowerCase().includes(this.searchText.toLowerCase());
-
-      const matchRating = (s.rating ?? 0) >= this.minRating;
-
-      const matchPrice =
-        selectedPrices.length === 0 || selectedPrices.includes(s.priceRange as PriceRange);
-
+      const matchRating = (s.rating || 0) >= this.minRating;
+      const selectedPrices = Object.keys(this.priceFilters).filter((k) => this.priceFilters[k]);
+      const matchPrice = selectedPrices.length === 0 || selectedPrices.includes(s.priceRange ?? '');
       return matchText && matchRating && matchPrice;
     });
+
+    this.filteredSalons = this.applySort(filtered);
+  }
+
+  private applySort(salons: SalonSummary[]): SalonSummary[] {
+    if (this.sortBy === 'rating') {
+      return [...salons].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    }
+    if (this.sortBy === 'reviewCount') {
+      return [...salons].sort((a, b) => (b.reviewCount ?? 0) - (a.reviewCount ?? 0));
+    }
+    return salons;
   }
 }

@@ -109,10 +109,23 @@
       </div>
     }
 
-    <!-- RESULTS HEADER -->
+    <!-- RESULTS HEADER & SORTING -->
     @if (!isLoading) {
       <div class="results-header">
-        <span>Showing <strong>{{ filteredSalons.length }}</strong> results</span>
+        <span class="results-count">Showing <strong>{{ filteredSalons.length }}</strong> results</span>
+
+        <!-- MOVED SORTING HERE -->
+        <div class="sort-container">
+          <label for="sort" class="sort-label">Sort by:</label>
+          <select id="sort"
+                  class="sort-select"
+                  [(ngModel)]="sortBy"
+                  (change)="applyFrontendFilters()">
+            <option value="none">Default</option>
+            <option value="rating">Top Rated</option>
+            <option value="reviewCount">Most Reviewed</option>
+          </select>
+        </div>
       </div>
     }
 
