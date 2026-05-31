@@ -3,12 +3,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { SalonDetail, SalonRequest, SalonSummary } from '../model/salon.model';
+import { environment } from '../environments/environment';
+
 
 @Injectable({
   providedIn: 'root',
 })
 export class SalonService {
-  private apiUrl = 'http://localhost:8080/api/salons';
+  private readonly apiUrl = environment.apiUrl;
   private salonsCache: SalonSummary[] | null = null;
 
   constructor(private http: HttpClient) {}
