@@ -2,6 +2,7 @@ package batu.beautysalon.dto;
 
 import batu.beautysalon.model.PriceRange;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +23,8 @@ public class SalonRequestDto {
 
     @NotBlank(message = "District cannot be blank")
     private String district;
-
+    //+48 123 456 789
+    @Pattern(regexp = "^\\+?[0-9\\s\\-]{9,15}$", message = "Invalid phone number format")
     private String phoneNumber;
     private String website;
     private List<String> servicesOffered;

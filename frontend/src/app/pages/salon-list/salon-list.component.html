@@ -66,7 +66,7 @@
 
   </aside>
 
-  <!-- RIGHT SIDE: GRID (Keep your existing grid code here!) -->
+  <!-- RIGHT SIDE: GRID -->
   <section class="content">
     <div class="results-header">
       <span>Showing <strong>{{filteredSalons.length}}</strong> results</span>
@@ -75,6 +75,7 @@
     <div class="grid">
       <div class="card" *ngFor="let salon of filteredSalons" [routerLink]="['/salons', salon.id]">
         <div class="card-img">
+
           <span class="badge">{{ salon.priceRange }}</span>
         </div>
         <div class="card-body">

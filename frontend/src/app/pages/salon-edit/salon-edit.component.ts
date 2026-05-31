@@ -18,6 +18,10 @@ export class SalonEditComponent implements OnInit {
   isSaving = false;
   errorMessage = '';
 
+  // DEBUG SWITCH
+  disableFrontendValidation = false;
+  backendErrors: { [key: string]: string[] } = {};
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -50,15 +54,24 @@ export class SalonEditComponent implements OnInit {
 
   saveChanges() {
     this.isSaving = true;
+    this.errorMessage = '';
+    this.backendErrors = {}; // Clear old errors
 
     this.salonService.updateSalon(this.salonId, this.salonData).subscribe({
       next: () => {
         this.router.navigate(['/salons', this.salonId]);
       },
       error: (err) => {
-        console.error(err);
-        this.errorMessage = 'Failed to save changes. Check backend logs.';
         this.isSaving = false;
+
+        if (err.status === 400 && err.error && err.error.errors) {
+          this.backendErrors = err.error.errors;
+          this.errorMessage = 'Please fix the highlighted fields below.';
+        } else {
+          console.error(err);
+          this.errorMessage = 'Failed to save changes. Check backend logs.';
+        }
+
         this.cdr.detectChanges();
       },
     });
