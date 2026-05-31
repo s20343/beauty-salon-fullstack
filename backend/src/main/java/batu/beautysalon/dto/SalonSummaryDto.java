@@ -19,5 +19,5 @@ public class SalonSummaryDto {
     private Double rating;
     private Integer reviewCount;
     private PriceRange priceRange;
-    private List<String> servicesOffered;
+
 }

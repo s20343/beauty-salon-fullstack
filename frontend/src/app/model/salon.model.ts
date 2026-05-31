@@ -8,7 +8,6 @@ export interface SalonSummary {
   rating: number | null;
   reviewCount: number | null;
   priceRange: PriceRange | null;
-  servicesOffered: string[];
 }
 
 export interface SalonDetail {
@@ -23,10 +22,6 @@ export interface SalonDetail {
   rating: number | null;
   reviewCount: number | null;
   description: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface SalonRequest {
@@ -34,12 +29,6 @@ export interface SalonRequest {
   address: string;
   district: string;
   phoneNumber: string | null;
-  website: string | null;
-  servicesOffered: string[];
   priceRange: PriceRange | null;
-  rating: number | null;
-  reviewCount: number | null;
   description: string | null;
-  latitude: number | null;
-  longitude: number | null;
 }

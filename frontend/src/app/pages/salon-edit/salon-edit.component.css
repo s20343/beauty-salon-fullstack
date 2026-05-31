@@ -137,16 +137,4 @@ hr {
   font-weight: 500;
 }
 
-/* 🛠️ DEBUG BOX */
-.debug-box {
-  background: #fffbeb;
-  border: 1px solid #f6e05e;
-  padding: 10px 15px;
-  border-radius: 6px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #b7791f;
-  font-weight: 600;
-}
+

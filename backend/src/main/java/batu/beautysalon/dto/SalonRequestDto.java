@@ -26,12 +26,8 @@ public class SalonRequestDto {
     //+48 123 456 789
     @Pattern(regexp = "^\\+?[0-9\\s\\-]{9,15}$", message = "Invalid phone number format")
     private String phoneNumber;
-    private String website;
     private List<String> servicesOffered;
     private PriceRange priceRange;
-    private Double rating;
-    private Integer reviewCount;
     private String description;
-    private Double latitude;
-    private Double longitude;
+
 }

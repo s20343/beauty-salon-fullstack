@@ -20,7 +20,6 @@ public class SalonMapper {
 
     public SalonSummaryDto toSummaryDto(Salon salon) {
         SalonSummaryDto dto = modelMapper.map(salon, SalonSummaryDto.class);
-        dto.setServicesOffered(parseServices(salon.getServicesOffered()));
         return dto;
     }
 
@@ -32,7 +31,6 @@ public class SalonMapper {
 
     public void updateEntityFromDto(SalonRequestDto requestDto, Salon entity) {
         modelMapper.map(requestDto, entity);
-        // Convert the List from the frontend back into a String for the database
         entity.setServicesOffered(joinServices(requestDto.getServicesOffered()));
     }
 

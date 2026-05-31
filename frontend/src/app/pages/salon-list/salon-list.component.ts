@@ -2,8 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { SalonService } from '../../service/salon.service';
 import { ChangeDetectorRef } from '@angular/core';
+
+import { SalonService } from '../../service/salon.service';
+import { SalonSummary, PriceRange } from '../../model/salon.model';
 
 @Component({
   selector: 'app-salon-list',
@@ -13,8 +15,10 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrls: ['./salon-list.component.css'],
 })
 export class SalonListComponent implements OnInit {
-  salons: any[] = [];
-  filteredSalons: any[] = [];
+  // ✅ properly typed data
+  salons: SalonSummary[] = [];
+  filteredSalons: SalonSummary[] = [];
+
   isLoading = false;
 
   // Backend filters
@@ -23,8 +27,10 @@ export class SalonListComponent implements OnInit {
 
   // Frontend filters
   searchText = '';
-  minRating: number = 0;
-  priceFilters: { [key: string]: boolean } = {
+  minRating = 0;
+
+  // ✅ strong typing using PriceRange union
+  priceFilters: Record<PriceRange, boolean> = {
     CHEAP: false,
     MODERATE: false,
     EXPENSIVE: false,
@@ -44,11 +50,13 @@ export class SalonListComponent implements OnInit {
     this.isLoading = true;
 
     this.salonService.getSalons(this.searchDistrict, this.searchServiceType).subscribe({
-      next: (dataFromBackend) => {
+      next: (dataFromBackend: SalonSummary[]) => {
         this.salons = dataFromBackend;
         this.applyFrontendFilters();
         this.isLoading = false;
-        this.cdr.detectChanges();//bugfix
+
+        // ⚠️ only needed because of earlier change detection issue
+        this.cdr.detectChanges();
       },
       error: () => {
         this.salons = [];
@@ -59,11 +67,17 @@ export class SalonListComponent implements OnInit {
   }
 
   applyFrontendFilters() {
-    this.filteredSalons = this.salons.filter((s) => {
+    const selectedPrices = Object.entries(this.priceFilters)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([price]) => price as PriceRange);
+
+    this.filteredSalons = this.salons.filter((s: SalonSummary) => {
       const matchText = s.name.toLowerCase().includes(this.searchText.toLowerCase());
-      const matchRating = (s.rating || 0) >= this.minRating;
-      const selectedPrices = Object.keys(this.priceFilters).filter((k) => this.priceFilters[k]);
-      const matchPrice = selectedPrices.length === 0 || selectedPrices.includes(s.priceRange);
+
+      const matchRating = (s.rating ?? 0) >= this.minRating;
+
+      const matchPrice =
+        selectedPrices.length === 0 || selectedPrices.includes(s.priceRange as PriceRange);
 
       return matchText && matchRating && matchPrice;
     });

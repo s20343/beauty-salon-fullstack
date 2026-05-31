@@ -14,20 +14,6 @@
       <h2>Edit Salon: {{ salonData.name }}</h2>
     </div>
 
-    <!-- DEBUG TOGGLE -->
-    <div class="debug-box">
-      <input
-        type="checkbox"
-        id="debugMode"
-        name="debugMode"
-        [(ngModel)]="disableFrontendValidation"
-      />
-
-      <label for="debugMode">
-        🛠️ Debug Mode: Bypass frontend validation (test backend only)
-      </label>
-    </div>
-
     <form #editForm="ngForm" class="edit-form">
 
       <!-- NAME -->

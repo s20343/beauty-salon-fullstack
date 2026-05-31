@@ -1,8 +1,9 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SalonService } from '../../service/salon.service';
+import { SalonDetail, SalonRequest } from '../../model/salon.model';
 
 @Component({
   selector: 'app-salon-edit',
@@ -13,14 +14,14 @@ import { SalonService } from '../../service/salon.service';
 })
 export class SalonEditComponent implements OnInit {
   salonId!: number;
-  salonData: any = null;
+  salonData: SalonDetail | null = null;
   isLoading = true;
   isSaving = false;
   errorMessage = '';
+  backendErrors: Record<string, string[]> = {};
 
-  // DEBUG SWITCH
-  disableFrontendValidation = false;
-  backendErrors: { [key: string]: string[] } = {};
+  // Set to true to bypass frontend validation and test backend errors directly
+  readonly disableFrontendValidation = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -41,39 +42,46 @@ export class SalonEditComponent implements OnInit {
         next: (data) => {
           this.salonData = data;
           this.isLoading = false;
-          this.cdr.detectChanges();
+          this.cdr.detectChanges(); //bug fix
         },
-        error: (err) => {
+        error: () => {
           this.errorMessage = 'Failed to load salon for editing.';
           this.isLoading = false;
-          this.cdr.detectChanges();
+          this.cdr.detectChanges(); //bug fix
         },
       });
     });
   }
 
   saveChanges() {
+    if (!this.salonData) return;
+
     this.isSaving = true;
     this.errorMessage = '';
-    this.backendErrors = {}; // Clear old errors
+    this.backendErrors = {};
 
-    this.salonService.updateSalon(this.salonId, this.salonData).subscribe({
+    const payload: SalonRequest = {
+      name: this.salonData.name,
+      address: this.salonData.address,
+      district: this.salonData.district,
+      phoneNumber: this.salonData.phoneNumber,
+      priceRange: this.salonData.priceRange,
+      description: this.salonData.description,
+    };
+
+    this.salonService.updateSalon(this.salonId, payload).subscribe({
       next: () => {
         this.router.navigate(['/salons', this.salonId]);
-
       },
       error: (err) => {
         this.isSaving = false;
-
-        if (err.status === 400 && err.error && err.error.errors) {
+        if (err.status === 400 && err.error?.errors) {
           this.backendErrors = err.error.errors;
           this.errorMessage = 'Please fix the highlighted fields below.';
         } else {
-          console.error(err);
-          this.errorMessage = 'Failed to save changes. Check backend logs.';
+          this.errorMessage = 'Failed to save changes.';
         }
-
-        this.cdr.detectChanges();
+        this.cdr.detectChanges(); // bug fix
       },
     });
   }

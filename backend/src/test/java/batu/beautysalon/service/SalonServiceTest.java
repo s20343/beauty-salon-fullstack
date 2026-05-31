@@ -161,4 +161,26 @@ class SalonServiceTest {
         verify(salonRepository)
                 .save(any(Salon.class));
     }
+    @Test
+    void shouldFilterByDistrictAndService() {
+
+        Salon salon = Salon.builder()
+                .district("Mokotów")
+                .servicesOffered("Nails")
+                .build();
+
+        when(salonRepository
+                .findByDistrictIgnoreCaseAndServicesOfferedContainingIgnoreCase(
+                        "Mokotów", "Nails"))
+                .thenReturn(List.of(salon));
+
+        List<SalonSummaryDto> result =
+                salonService.getAllSalons("Mokotów", "Nails");
+
+        verify(salonRepository)
+                .findByDistrictIgnoreCaseAndServicesOfferedContainingIgnoreCase(
+                        "Mokotów", "Nails");
+
+        assertThat(result).hasSize(1);
+    }
 }
