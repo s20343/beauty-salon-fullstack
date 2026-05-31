@@ -23,8 +23,8 @@ public class SalonRequestDto {
 
     @NotBlank(message = "District cannot be blank")
     private String district;
-    //+48 123 456 789
-    @Pattern(regexp = "^\\+?[0-9\\s\\-]{9,15}$", message = "Invalid phone number format")
+    //+48123456789
+    @Pattern(regexp = "^\\+48\\d{9}$", message = "Phone number must be exactly in the format +48123456789")
     private String phoneNumber;
     private List<String> servicesOffered;
     private PriceRange priceRange;

@@ -1,165 +1,181 @@
 <div class="edit-container">
 
-  <div *ngIf="isLoading" class="loading-state">
-    ⏳ Loading data...
-  </div>
-
-  <div *ngIf="errorMessage" class="error-state">
-    ⚠️ {{ errorMessage }}
-  </div>
-
-  <div *ngIf="salonData && !isLoading" class="content-box">
-
-    <div class="header-actions">
-      <h2>Edit Salon: {{ salonData.name }}</h2>
+  @if (isLoading) {
+    <div class="loading-state">
+      ⏳ Loading data...
     </div>
+  }
 
-    <form #editForm="ngForm" class="edit-form">
+  @if (errorMessage) {
+    <div class="error-state">
+      ⚠️ {{ errorMessage }}
+    </div>
+  }
 
-      <!-- NAME -->
-      <div class="form-group">
-        <label>Salon Name</label>
+  @if (salonData && !isLoading) {
+    <div class="content-box">
 
-        <input
-          type="text"
-          name="name"
-          [(ngModel)]="salonData.name"
-          required
-          #name="ngModel"
-          class="form-input"
-          [class.is-invalid]="(name.invalid && name.touched && !disableFrontendValidation) || backendErrors['name']"
-        />
-
-        <div class="error-text" *ngIf="name.invalid && name.touched && !disableFrontendValidation">
-          Name is required
-        </div>
-
-        <div class="error-text" *ngIf="backendErrors['name']">
-          {{ backendErrors['name'][0] }}
-        </div>
+      <!-- Improved Header Structure -->
+      <div class="header-wrapper">
+        <span class="pre-title">Edit Details For</span>
+        <h2 class="main-title">{{ salonData.name }}</h2>
       </div>
 
-      <!-- ADDRESS + DISTRICT -->
-      <div class="form-group-row">
+      <form #editForm="ngForm" class="edit-form">
 
+        <!-- NAME -->
         <div class="form-group">
-          <label>Address</label>
+          <label>Salon Name</label>
 
           <input
             type="text"
-            name="address"
-            [(ngModel)]="salonData.address"
+            name="name"
+            [(ngModel)]="salonData.name"
             required
-            #address="ngModel"
+            #name="ngModel"
             class="form-input"
-            [class.is-invalid]="(address.invalid && address.touched && !disableFrontendValidation) || backendErrors['address']"
+            [class.is-invalid]="(name.invalid && name.touched && !disableFrontendValidation) || backendErrors['name']"
+            placeholder="Enter salon name"
           />
 
-          <div class="error-text" *ngIf="address.invalid && address.touched && !disableFrontendValidation">
-            Address is required
-          </div>
+          @if (name.invalid && name.touched && !disableFrontendValidation) {
+            <div class="error-text">Name is required</div>
+          }
 
-          <div class="error-text" *ngIf="backendErrors['address']">
-            {{ backendErrors['address'][0] }}
-          </div>
+          @if (backendErrors['name']) {
+            <div class="error-text">{{ backendErrors['name'][0] }}</div>
+          }
         </div>
 
-        <div class="form-group">
-          <label>District</label>
+        <!-- ADDRESS + DISTRICT -->
+        <div class="form-group-row">
 
-          <input
-            type="text"
-            name="district"
-            [(ngModel)]="salonData.district"
-            required
-            #district="ngModel"
-            class="form-input"
-            [class.is-invalid]="(district.invalid && district.touched && !disableFrontendValidation) || backendErrors['district']"
-          />
+          <div class="form-group">
+            <label>Address</label>
 
-          <div class="error-text" *ngIf="district.invalid && district.touched && !disableFrontendValidation">
-            District is required
+            <input
+              type="text"
+              name="address"
+              [(ngModel)]="salonData.address"
+              required
+              #address="ngModel"
+              class="form-input"
+              [class.is-invalid]="(address.invalid && address.touched && !disableFrontendValidation) || backendErrors['address']"
+              placeholder="Street and building number"
+            />
+
+            @if (address.invalid && address.touched && !disableFrontendValidation) {
+              <div class="error-text">Address is required</div>
+            }
+
+            @if (backendErrors['address']) {
+              <div class="error-text">{{ backendErrors['address'][0] }}</div>
+            }
           </div>
 
-          <div class="error-text" *ngIf="backendErrors['district']">
-            {{ backendErrors['district'][0] }}
+          <div class="form-group">
+            <label>District</label>
+
+            <input
+              type="text"
+              name="district"
+              [(ngModel)]="salonData.district"
+              required
+              #district="ngModel"
+              class="form-input"
+              [class.is-invalid]="(district.invalid && district.touched && !disableFrontendValidation) || backendErrors['district']"
+              placeholder="e.g. Mokotów"
+            />
+
+            @if (district.invalid && district.touched && !disableFrontendValidation) {
+              <div class="error-text">District is required</div>
+            }
+
+            @if (backendErrors['district']) {
+              <div class="error-text">{{ backendErrors['district'][0] }}</div>
+            }
           </div>
+
         </div>
 
-      </div>
+        <!-- PHONE + PRICE -->
+        <div class="form-group-row">
 
-      <!-- PHONE + PRICE -->
-      <div class="form-group-row">
+          <div class="form-group">
+            <label>Phone Number</label>
 
-        <div class="form-group">
-          <label>Phone Number</label>
+            <input
+              type="text"
+              name="phoneNumber"
+              [(ngModel)]="salonData.phoneNumber"
+              pattern="^\+48\d{9}$"
+              #phone="ngModel"
+              class="form-input"
+              [class.is-invalid]="(phone.invalid && phone.touched && !disableFrontendValidation) || backendErrors['phoneNumber']"
+              placeholder="+48123456789"
+            />
 
-          <input
-            type="text"
-            name="phoneNumber"
-            [(ngModel)]="salonData.phoneNumber"
-            pattern="^\+?[0-9\s\-]{9,15}$"
-            #phone="ngModel"
-            class="form-input"
-            [class.is-invalid]="(phone.invalid && phone.touched && !disableFrontendValidation) || backendErrors['phoneNumber']"
-          />
+            @if (phone.invalid && phone.touched && !disableFrontendValidation) {
+              <div class="error-text">Invalid phone number format</div>
+            }
 
-          <div class="error-text" *ngIf="phone.invalid && phone.touched && !disableFrontendValidation">
-            Invalid phone number format
+            @if (backendErrors['phoneNumber']) {
+              <div class="error-text">{{ backendErrors['phoneNumber'][0] }}</div>
+            }
           </div>
 
-          <div class="error-text" *ngIf="backendErrors['phoneNumber']">
-            {{ backendErrors['phoneNumber'][0] }}
+          <div class="form-group">
+            <label>Price Range</label>
+
+            <select
+              name="priceRange"
+              [(ngModel)]="salonData.priceRange"
+              class="form-input select-input"
+            >
+              <option value="CHEAP">Cheap</option>
+              <option value="MODERATE">Moderate</option>
+              <option value="EXPENSIVE">Expensive</option>
+              <option value="LUXURY">Luxury</option>
+            </select>
           </div>
+
         </div>
 
+        <!-- DESCRIPTION -->
         <div class="form-group">
-          <label>Price Range</label>
+          <label>Description</label>
 
-          <select
-            name="priceRange"
-            [(ngModel)]="salonData.priceRange"
+          <textarea
+            name="description"
+            [(ngModel)]="salonData.description"
+            rows="5"
             class="form-input"
+            placeholder="Tell us a little bit about this salon..."
+          ></textarea>
+        </div>
+
+        <hr class="divider" />
+
+        <!-- BUTTONS -->
+        <div class="button-group">
+          <button class="cancel-btn"
+                  [routerLink]="['/salons', salonId]"
+                  type="button">
+            Cancel
+          </button>
+
+          <button
+            class="save-btn"
+            (click)="saveChanges()"
+            [disabled]="(!disableFrontendValidation && editForm.invalid) || isSaving"
+            type="button"
           >
-            <option value="CHEAP">Cheap</option>
-            <option value="MODERATE">Moderate</option>
-            <option value="EXPENSIVE">Expensive</option>
-            <option value="LUXURY">Luxury</option>
-          </select>
+            {{ isSaving ? 'Saving...' : 'Save Changes' }}
+          </button>
         </div>
 
-      </div>
+      </form>
+    </div>
+  }
 
-      <!-- DESCRIPTION -->
-      <div class="form-group">
-        <label>Description</label>
-
-        <textarea
-          name="description"
-          [(ngModel)]="salonData.description"
-          rows="5"
-          class="form-input"
-        ></textarea>
-      </div>
-
-      <hr />
-
-      <!-- BUTTONS -->
-      <div class="button-group">
-        <button class="cancel-btn" [routerLink]="['/salons', salonId]" type="button">
-          Cancel
-        </button>
-
-        <button
-          class="save-btn"
-          (click)="saveChanges()"
-          [disabled]="(!disableFrontendValidation && editForm.invalid) || isSaving"
-          type="button"
-        >
-          {{ isSaving ? 'Saving...' : 'Save Changes' }}
-        </button>
-      </div>
-
-    </form>
-  </div>
 </div>

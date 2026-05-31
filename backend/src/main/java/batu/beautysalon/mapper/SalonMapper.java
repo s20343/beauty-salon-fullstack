@@ -43,6 +43,7 @@ public class SalonMapper {
                 .toList();
     }
 
+    //unused helper for future feature(editing services from DTO)
     public static String joinServices(List<String> list) {
         if (list == null || list.isEmpty()) return "";
         return String.join("|", list);

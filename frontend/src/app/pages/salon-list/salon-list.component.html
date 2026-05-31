@@ -28,7 +28,7 @@
       </select>
     </div>
 
-    <!--BACKEND FILTER: Service Type -->
+    <!-- BACKEND FILTER: Service Type -->
     <div class="filter-section">
       <label class="section-title">Service</label>
       <select class="search-input"
@@ -48,9 +48,15 @@
         <label class="section-title">Minimum Rating</label>
         <span class="slider-value">⭐ {{ minRating | number:'1.1-1' }}+</span>
       </div>
-      <input type="range" class="range-slider" min="0" max="5" step="0.5"
+
+      <input type="range"
+             class="range-slider"
+             min="0"
+             max="5"
+             step="0.5"
              [(ngModel)]="minRating"
              (input)="applyFrontendFilters()">
+
       <div class="slider-labels">
         <span>0</span><span>5.0</span>
       </div>
@@ -59,73 +65,96 @@
     <!-- FRONTEND FILTER: Price -->
     <div class="filter-section no-border">
       <label class="section-title">Price Range</label>
+
       <div class="checkbox-group">
         <label class="checkbox-container">
-          <input type="checkbox" [(ngModel)]="priceFilters['CHEAP']" (change)="applyFrontendFilters()">
+          <input type="checkbox"
+                 [(ngModel)]="priceFilters['CHEAP']"
+                 (change)="applyFrontendFilters()">
           <span class="checkmark"></span> Cheap
         </label>
+
         <label class="checkbox-container">
-          <input type="checkbox" [(ngModel)]="priceFilters['MODERATE']" (change)="applyFrontendFilters()">
+          <input type="checkbox"
+                 [(ngModel)]="priceFilters['MODERATE']"
+                 (change)="applyFrontendFilters()">
           <span class="checkmark"></span> Moderate
         </label>
+
         <label class="checkbox-container">
-          <input type="checkbox" [(ngModel)]="priceFilters['EXPENSIVE']" (change)="applyFrontendFilters()">
+          <input type="checkbox"
+                 [(ngModel)]="priceFilters['EXPENSIVE']"
+                 (change)="applyFrontendFilters()">
           <span class="checkmark"></span> Expensive
         </label>
+
         <label class="checkbox-container">
-          <input type="checkbox" [(ngModel)]="priceFilters['LUXURY']" (change)="applyFrontendFilters()">
+          <input type="checkbox"
+                 [(ngModel)]="priceFilters['LUXURY']"
+                 (change)="applyFrontendFilters()">
           <span class="checkmark"></span> Luxury
         </label>
       </div>
     </div>
+
   </aside>
 
   <!-- RIGHT CONTENT -->
   <section class="content">
 
-    <!-- LOADING STATE -->
-    <div *ngIf="isLoading" class="loading-state">
-      ⏳ Loading salons...
-    </div>
+    <!-- LOADING -->
+    @if (isLoading) {
+      <div class="loading-state">
+        ⏳ Loading salons...
+      </div>
+    }
 
     <!-- RESULTS HEADER -->
-    <div *ngIf="!isLoading" class="results-header">
-      <span>Showing <strong>{{ filteredSalons.length }}</strong> results</span>
-    </div>
+    @if (!isLoading) {
+      <div class="results-header">
+        <span>Showing <strong>{{ filteredSalons.length }}</strong> results</span>
+      </div>
+    }
 
     <!-- GRID -->
-    <div *ngIf="!isLoading" class="grid">
+    @if (!isLoading) {
+      <div class="grid">
 
-      <div class="card"
-           *ngFor="let salon of filteredSalons"
-           [routerLink]="['/salons', salon.id]">
+        @for (salon of filteredSalons; track salon.id) {
+          <div class="card"
+               [routerLink]="['/salons', salon.id]">
 
-        <div class="card-img"
-             [style.background-image]="'url(https://picsum.photos/seed/' + salon.id + '/400/250)'"
-             style="background-size: cover; background-position: center;">
+            <div class="card-img"
+                 [style.background-image]="'url(https://picsum.photos/seed/' + salon.id + '/400/250)'"
+                 style="background-size: cover; background-position: center;">
 
-          <span class="badge">{{ salon.priceRange }}</span>
-        </div>
+              <span class="badge">{{ salon.priceRange }}</span>
+            </div>
 
-        <div class="card-body">
-          <h3 class="card-title">{{ salon.name }}</h3>
-          <p class="card-address">{{ salon.address }}, {{ salon.district }}</p>
+            <div class="card-body">
+              <h3 class="card-title">{{ salon.name }}</h3>
+              <p class="card-address">{{ salon.address }}, {{ salon.district }}</p>
 
-          <div class="card-footer">
-            <span class="rating">⭐ {{ salon.rating | number:'1.1-1' }}</span>
-            <span class="reviews">{{ salon.reviewCount }} reviews</span>
+              <div class="card-footer">
+                <span class="rating">⭐ {{ salon.rating | number:'1.1-1' }}</span>
+                <span class="reviews">{{ salon.reviewCount }} reviews</span>
+              </div>
+            </div>
+
           </div>
-        </div>
+        }
 
       </div>
-    </div>
+    }
 
-    <!-- EMPTY STATE (ONLY AFTER LOAD) -->
-    <div *ngIf="!isLoading && filteredSalons.length === 0" class="no-results">
-      <div style="font-size: 40px; margin-bottom: 15px;">🔍</div>
-      <h3>No salons found</h3>
-      <p>Try adjusting your filters to see more results.</p>
-    </div>
+    <!-- EMPTY STATE -->
+    @if (!isLoading && filteredSalons.length === 0) {
+      <div class="no-results">
+        <div style="font-size: 40px; margin-bottom: 15px;">🔍</div>
+        <h3>No salons found</h3>
+        <p>Try adjusting your filters to see more results.</p>
+      </div>
+    }
 
   </section>
 </div>

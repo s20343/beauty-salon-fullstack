@@ -1,27 +1,47 @@
 .edit-container {
   max-width: 800px;
-  margin: 0 auto;
+  margin: 40px auto; /* Added top/bottom margin to push it away from header */
+  padding: 0 20px;
 }
 
 .content-box {
   background: white;
-  padding: 40px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  padding: 45px 50px;
+  border-radius: 16px;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); /* Softer, larger shadow */
 }
 
-h2 {
-  margin-top: 0;
+/* --- Header Styling Improvements --- */
+.header-wrapper {
+  margin-bottom: 35px;
+  padding-bottom: 25px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.pre-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+
+.main-title {
+  margin: 0;
   color: #1a202c;
-  font-size: 24px;
-  margin-bottom: 25px;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
+/* --- Form Layout --- */
 .edit-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
 .form-group {
@@ -33,90 +53,125 @@ h2 {
 
 .form-group-row {
   display: flex;
-  gap: 20px;
+  gap: 24px;
+}
+
+/* Make rows stack on smaller screens */
+@media (max-width: 600px) {
+  .form-group-row {
+    flex-direction: column;
+    gap: 24px;
+  }
 }
 
 .form-group label {
   font-size: 13px;
-  font-weight: bold;
+  font-weight: 700;
   color: #4a5568;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
+/* --- Input Enhancements --- */
 .form-input {
-  padding: 12px;
-  border: 1px solid #cbd5e0;
-  border-radius: 6px;
+  padding: 14px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   font-size: 15px;
   color: #2d3748;
-  transition: all 0.2s;
+  background-color: #f8fafc; /* Slight grayish background */
+  transition: all 0.2s ease-in-out;
   font-family: inherit;
 }
 
+.form-input::placeholder {
+  color: #a0aec0;
+}
+
 .form-input:focus {
+  background-color: #ffffff;
   border-color: #3182ce;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15); /* Sleeker focus ring */
 }
 
-hr {
+/* Custom styling for select to match the inputs better */
+.select-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234A5568%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px top 50%;
+  background-size: 10px auto;
+  padding-right: 40px;
+}
+
+.divider {
   border: none;
-  border-top: 1px solid #e2e8f0;
-  margin: 30px 0;
+  border-top: 1px solid #edf2f7;
+  margin: 10px 0;
 }
 
+/* --- Buttons --- */
 .button-group {
   display: flex;
   justify-content: flex-end;
   gap: 15px;
+  margin-top: 10px;
 }
 
 .cancel-btn,
 .save-btn {
-  padding: 12px 24px;
+  padding: 12px 28px;
   border: none;
-  border-radius: 6px;
-  font-weight: bold;
+  border-radius: 8px; /* Slightly rounder edges */
+  font-weight: 600;
   font-size: 15px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.2s ease-in-out;
 }
 
 .cancel-btn {
   background: white;
   color: #4a5568;
-  border: 1px solid #cbd5e0;
+  border: 1px solid #e2e8f0;
 }
 
 .cancel-btn:hover {
   background: #f7fafc;
+  color: #1a202c;
+  border-color: #cbd5e0;
 }
 
 .save-btn {
   background: #3182ce;
   color: white;
-  box-shadow: 0 4px 6px rgba(49, 130, 206, 0.2);
+  box-shadow: 0 4px 6px rgba(49, 130, 206, 0.25);
 }
 
 .save-btn:hover:not(:disabled) {
   background: #2b6cb0;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 10px rgba(49, 130, 206, 0.3);
 }
 
 .save-btn:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
+/* --- Validation & States --- */
 .loading-state,
 .error-state {
   text-align: center;
   padding: 50px;
   font-size: 18px;
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
   background: white;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
 }
 
 .error-state {
@@ -126,15 +181,17 @@ hr {
 }
 
 .is-invalid {
-  border-color: #e53e3e !important;
+  border-color: #fc8181 !important;
   background-color: #fff5f5 !important;
+}
+
+.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.15) !important;
 }
 
 .error-text {
   color: #e53e3e;
   font-size: 13px;
   margin-top: 4px;
-  font-weight: 500;
+  font-weight: 600;
 }
-
-
