@@ -103,3 +103,16 @@
   transform: rotate(45deg);
 }
 .checkbox-container input:checked ~ .checkmark:after { display: block; }
+.card-img-placeholder {
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+  border-radius: 12px 12px 0 0;
+}
+
+.salon-icon {
+  font-size: 42px;
+  color: #6b7280;
+}

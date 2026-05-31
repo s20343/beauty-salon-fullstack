@@ -15,12 +15,12 @@ export class SalonListComponent implements OnInit {
   salons: any[] = [];
   filteredSalons: any[] = [];
 
-  // Search States
+  isLoading = false; // FIXED
+
   searchText = '';
   searchDistrict = '';
-  minRating: number = 0; // For the slider
+  minRating: number = 0;
 
-  // Price Checkbox States
   priceFilters: { [key: string]: boolean } = {
     CHEAP: false,
     MODERATE: false,
@@ -31,22 +31,38 @@ export class SalonListComponent implements OnInit {
   constructor(private salonService: SalonService) {}
 
   ngOnInit() {
-    this.salonService.getSalons().subscribe((data) => {
-      this.salons = data;
-      this.filteredSalons = data;
+    this.loadSalons();
+  }
+
+  loadSalons() {
+    this.isLoading = true;
+
+    this.salonService.getSalons().subscribe({
+      next: (data) => {
+        this.salons = data;
+        this.filteredSalons = data;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.salons = [];
+        this.filteredSalons = [];
+        this.isLoading = false;
+      },
     });
   }
 
   onSearch() {
     this.filteredSalons = this.salons.filter((s) => {
-      // 1. Text Match
       const matchText =
         s.name.toLowerCase().includes(this.searchText.toLowerCase()) ||
         s.district.toLowerCase().includes(this.searchText.toLowerCase());
 
       const matchDistrict = this.searchDistrict === '' || s.district === this.searchDistrict;
+
       const matchRating = (s.rating || 0) >= this.minRating;
+
       const selectedPrices = Object.keys(this.priceFilters).filter((k) => this.priceFilters[k]);
+
       const matchPrice = selectedPrices.length === 0 || selectedPrices.includes(s.priceRange);
 
       return matchText && matchDistrict && matchRating && matchPrice;

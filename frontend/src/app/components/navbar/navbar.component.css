@@ -1,13 +1,103 @@
 .navbar {
-  display: flex; justify-content: space-between; align-items: center;
-  background-color: white; padding: 15px 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background-color: white;
+  padding: 14px 50px;
+
   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  position: sticky; top: 0; z-index: 100;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
-.logo-container { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-.icon { font-size: 24px; }
-.logo-text { font-size: 20px; font-weight: 800; color: #2d3748; }
-.nav-links a { margin: 0 20px; text-decoration: none; color: #718096; font-weight: 600; }
-.nav-links a:hover, .active-link { color: #3182ce !important; }
-.login-btn { background-color: transparent; color: #3182ce; border: 2px solid #3182ce; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-.login-btn:hover { background-color: #3182ce; color: white; }
+
+/* LOGO */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.icon {
+  font-size: 26px;
+}
+
+.logo-text-group {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 800;
+  color: #2d3748;
+}
+
+.logo-subtext {
+  font-size: 12px;
+  color: #718096;
+  font-weight: 500;
+}
+
+/* NAV LINKS */
+.nav-links {
+  display: flex;
+  gap: 24px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #718096;
+  font-weight: 600;
+  font-size: 14px;
+  position: relative;
+  transition: 0.2s;
+}
+
+.nav-links a:hover {
+  color: #3182ce;
+}
+
+.active-link {
+  color: #3182ce !important;
+}
+
+/* ACTION BUTTON */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.login-btn {
+  background-color: transparent;
+  color: #3182ce;
+  border: 2px solid #3182ce;
+
+  padding: 8px 16px;
+  border-radius: 8px;
+
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+
+  transition: all 0.2s ease;
+}
+
+.login-btn:hover {
+  background-color: #3182ce;
+  color: white;
+  transform: translateY(-1px);
+}
+.login-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-icon {
+  font-size: 16px;
+}

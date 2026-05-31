@@ -1,19 +1,22 @@
 <div class="layout">
 
-  <!-- LEFT SIDEBAR: ADVANCED FILTERS -->
+  <!-- LEFT SIDEBAR -->
   <aside class="sidebar">
 
-    <!-- 1. Text Search -->
     <div class="filter-section">
       <label class="section-title">Search by keyword</label>
-      <input type="text" class="search-input" placeholder="Salon name..."
-             [(ngModel)]="searchText" (input)="onSearch()">
+      <input type="text"
+             class="search-input"
+             placeholder="Salon name..."
+             [(ngModel)]="searchText"
+             (input)="onSearch()">
     </div>
 
-    <!-- 2. Location Dropdown -->
     <div class="filter-section">
       <label class="section-title">Location</label>
-      <select class="search-input" [(ngModel)]="searchDistrict" (change)="onSearch()">
+      <select class="search-input"
+              [(ngModel)]="searchDistrict"
+              (change)="onSearch()">
         <option value="">All Districts</option>
         <option value="Śródmieście">Śródmieście</option>
         <option value="Mokotów">Mokotów</option>
@@ -23,42 +26,55 @@
       </select>
     </div>
 
-    <!-- 3. Minimum Rating Slider -->
     <div class="filter-section">
       <div class="slider-header">
         <label class="section-title">Minimum Rating</label>
         <span class="slider-value">⭐ {{ minRating | number:'1.1-1' }}+</span>
       </div>
-      <input type="range" class="range-slider" min="0" max="5" step="0.5"
-             [(ngModel)]="minRating" (input)="onSearch()">
+
+      <input type="range"
+             class="range-slider"
+             min="0"
+             max="5"
+             step="0.5"
+             [(ngModel)]="minRating"
+             (input)="onSearch()">
+
       <div class="slider-labels">
         <span>0</span>
         <span>5.0</span>
       </div>
     </div>
 
-    <!-- 4. Price Range Checkboxes -->
     <div class="filter-section no-border">
       <label class="section-title">Price Range</label>
 
       <div class="checkbox-group">
         <label class="checkbox-container">
-          <input type="checkbox" [(ngModel)]="priceFilters['CHEAP']" (change)="onSearch()">
+          <input type="checkbox"
+                 [(ngModel)]="priceFilters['CHEAP']"
+                 (change)="onSearch()">
           <span class="checkmark"></span> Cheap
         </label>
 
         <label class="checkbox-container">
-          <input type="checkbox" [(ngModel)]="priceFilters['MODERATE']" (change)="onSearch()">
+          <input type="checkbox"
+                 [(ngModel)]="priceFilters['MODERATE']"
+                 (change)="onSearch()">
           <span class="checkmark"></span> Moderate
         </label>
 
         <label class="checkbox-container">
-          <input type="checkbox" [(ngModel)]="priceFilters['EXPENSIVE']" (change)="onSearch()">
+          <input type="checkbox"
+                 [(ngModel)]="priceFilters['EXPENSIVE']"
+                 (change)="onSearch()">
           <span class="checkmark"></span> Expensive
         </label>
 
         <label class="checkbox-container">
-          <input type="checkbox" [(ngModel)]="priceFilters['LUXURY']" (change)="onSearch()">
+          <input type="checkbox"
+                 [(ngModel)]="priceFilters['LUXURY']"
+                 (change)="onSearch()">
           <span class="checkmark"></span> Luxury
         </label>
       </div>
@@ -66,33 +82,52 @@
 
   </aside>
 
-  <!-- RIGHT SIDE: GRID -->
+  <!-- RIGHT CONTENT -->
   <section class="content">
-    <div class="results-header">
-      <span>Showing <strong>{{filteredSalons.length}}</strong> results</span>
+
+    <!-- LOADING STATE -->
+    <div *ngIf="isLoading" class="loading-state">
+      ⏳ Loading salons...
     </div>
 
-    <div class="grid">
-      <div class="card" *ngFor="let salon of filteredSalons" [routerLink]="['/salons', salon.id]">
-        <div class="card-img">
+    <!-- RESULTS HEADER -->
+    <div *ngIf="!isLoading" class="results-header">
+      <span>Showing <strong>{{ filteredSalons.length }}</strong> results</span>
+    </div>
+
+    <!-- GRID -->
+    <div *ngIf="!isLoading" class="grid">
+
+      <div class="card"
+           *ngFor="let salon of filteredSalons"
+           [routerLink]="['/salons', salon.id]">
+
+        <div class="card-img"
+             [style.background-image]="'url(https://picsum.photos/seed/' + salon.id + '/400/250)'"
+             style="background-size: cover; background-position: center;">
 
           <span class="badge">{{ salon.priceRange }}</span>
         </div>
+
         <div class="card-body">
           <h3 class="card-title">{{ salon.name }}</h3>
-          <p class="card-address">{{ salon.address }}, {{salon.district}}</p>
+          <p class="card-address">{{ salon.address }}, {{ salon.district }}</p>
+
           <div class="card-footer">
             <span class="rating">⭐ {{ salon.rating | number:'1.1-1' }}</span>
             <span class="reviews">{{ salon.reviewCount }} reviews</span>
           </div>
         </div>
+
       </div>
     </div>
 
-    <div *ngIf="filteredSalons.length === 0" class="no-results">
+    <!-- EMPTY STATE (ONLY AFTER LOAD) -->
+    <div *ngIf="!isLoading && filteredSalons.length === 0" class="no-results">
       <div style="font-size: 40px; margin-bottom: 15px;">🔍</div>
       <h3>No salons found</h3>
       <p>Try adjusting your filters to see more results.</p>
     </div>
+
   </section>
 </div>
