@@ -15,36 +15,42 @@ A full-stack web application for browsing and managing beauty salons in Warsaw. 
 - In-memory salon list cache to avoid redundant API calls when navigating
 - Unit tests for service and controller layers
 
+---
+
 ## How to Run
 
 ### Prerequisites
 
 - Java 17+
 - Node.js 18+ and npm 10+
+- Docker and Docker Compose
 - Internet connection on first startup (required for the Overpass API data fetch)
 
-### Backend
+### 1. Start the database
+
+```bash
+docker-compose up -d
+```
+
+This starts a PostgreSQL instance locally. Data persists across restarts.
+
+### 2. Start the backend
 
 ```bash
 cd backend
 ./mvnw spring-boot:run
 ```
 
-The backend starts on `http://localhost:8080`. On first startup it fetches live salon data from the Overpass API and seeds the database, this takes a few seconds. You will see this in the console when ready:
+The backend starts on `http://localhost:8080`. On first startup Flyway runs the database migration, then the app fetches live salon data from the Overpass API and seeds the database. You will see this in the console when ready:
 
 ```
 Fetched 120 unique salons from OpenStreetMap.
 Successfully saved 120 salons to the database!
 ```
 
-On subsequent restarts the fetch is skipped since the database is already populated.
+On subsequent restarts the fetch is skipped since the data is already in the database.
 
-You can inspect the database via the H2 console at `http://localhost:8080/h2-console`:
-- JDBC URL: `jdbc:h2:mem:salon-db`
-- Username: `sa`
-- Password: *(leave blank)*
-
-### Frontend
+### 3. Start the frontend
 
 ```bash
 cd frontend
@@ -53,6 +59,16 @@ npm start
 ```
 
 The frontend starts on `http://localhost:4200`.
+
+### Resetting data
+
+To wipe the database and re-fetch fresh data from Overpass:
+
+```bash
+docker-compose down -v
+docker-compose up -d
+./mvnw spring-boot:run
+```
 
 ---
 
@@ -66,7 +82,9 @@ The frontend starts on `http://localhost:4200`.
 | Spring Data JPA | Database access and repository layer |
 | Spring Security | CORS and security configuration |
 | Spring Validation | Request body validation (`@NotBlank`, `@Pattern`) |
-| H2 | In-memory relational database |
+| PostgreSQL | Relational database |
+| Flyway | Database migration management |
+| Docker | Running PostgreSQL locally |
 | Lombok | Reduces boilerplate |
 | ModelMapper | Entity ↔ DTO mapping |
 | Java 17 | Language version |
@@ -106,17 +124,17 @@ Three pages (`SalonList`, `SalonDetail`, `SalonEdit`) and a shared `Navbar`. The
 
 ## What I'd Improve With More Time
 
-### Infrastructure
-- Replace H2 with PostgreSQL in Docker so data persists across restarts. Currently the app re-fetches from Overpass on every cold start
-- Add a `docker-compose.yml` so the full stack starts with one command
 ### Authentication & Authorization
 - JWT based login to protect edit actions
-- Role distinction between read only users and admins
+- Role distinction between read-only users and admins
+
 ### Data
 - Replace mocked ratings and price ranges with real data from Google Places API or a user contribution model
 - Cache the Overpass response to a file so the app can start without depending on the external API being available
+
 ### Backend
 - Add pagination to `GET /api/salons` so the API scales as the dataset grows
+
 ### Frontend
 - Migrate to Angular Signals (remove ChangeDetectorRef workarounds)
 - Persist filter state in URL query params so results are shareable and the back button restores the previous filter state
