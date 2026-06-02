@@ -28,7 +28,10 @@
             </a>
           }
 
-          <button class="edit-btn" [routerLink]="['/salons', salon.id, 'edit']">Edit Details</button>
+          <!--role cjheck-->
+          @if (auth.isAdmin()) {
+            <button class="edit-btn" [routerLink]="['/salons', salon.id, 'edit']">Edit Details</button>
+          }
         </div>
       </div>
 

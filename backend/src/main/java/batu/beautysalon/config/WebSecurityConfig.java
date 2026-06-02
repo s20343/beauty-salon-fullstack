@@ -45,16 +45,16 @@ public class WebSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 1. ALLOW THE ERROR ENDPOINT (This stops masking 400 errors as 403 errors)
+                        //ALLOW THE ERROR ENDPOINT
                         .requestMatchers("/error").permitAll()
 
-                        // 2. Public endpoints
+                        //Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/salons/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
 
-                        // 3. All mutations require authentication
-                        .requestMatchers(HttpMethod.PUT, "/api/salons/**").authenticated()
+                        //ll mutations require authentication
+                        .requestMatchers(HttpMethod.PUT, "/api/salons/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/salons/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/salons/**").hasRole("ADMIN")
 

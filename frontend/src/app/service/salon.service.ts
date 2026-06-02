@@ -10,7 +10,7 @@ import { environment } from '../environments/environment';
   providedIn: 'root',
 })
 export class SalonService {
-  private readonly apiUrl = environment.apiUrl;
+  private readonly apiUrl = `${environment.apiUrl}/salons`;
   private salonsCache: SalonSummary[] | null = null;
 
   constructor(private http: HttpClient) {}

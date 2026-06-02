@@ -1,0 +1,120 @@
+<div class="login-container">
+
+  <div class="content-box login-box">
+
+    <!-- Sleek Header -->
+    <div class="header-wrapper header-center">
+      <span class="pre-title">Secure Portal</span>
+      <h2 class="main-title">
+        {{ activeTabIndex === 0 ? 'Welcome Back' : 'Create Account' }}
+      </h2>
+    </div>
+
+    <!-- Modern Tab Switcher -->
+    <div class="tab-switcher">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTabIndex === 0"
+        (click)="activeTabIndex = 0">
+        Login
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTabIndex === 1"
+        (click)="activeTabIndex = 1">
+        Register
+      </button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    @if (activeTabIndex === 0) {
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="theme-form">
+
+        <div class="form-group">
+          <label>Username</label>
+          <input
+            type="text"
+            placeholder="Enter your username"
+            formControlName="username"
+            class="form-input"
+            [class.is-invalid]="loginForm.get('username')?.touched && loginForm.get('username')?.invalid"
+          />
+          @if (loginForm.get('username')?.touched && loginForm.get('username')?.invalid) {
+            <div class="error-text">Username is required (min 3 chars)</div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input
+            type="password"
+            placeholder="Enter your password"
+            formControlName="password"
+            class="form-input"
+            [class.is-invalid]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
+          />
+          @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
+            <div class="error-text">Password is required (min 6 chars)</div>
+          }
+        </div>
+
+        <button type="submit" class="save-btn full-width" [disabled]="loading || loginForm.invalid">
+          {{ loading ? 'Loading...' : 'Login securely' }}
+        </button>
+
+        <hr class="divider" />
+
+        <div class="demo-section">
+          <span class="pre-title text-center">Fast Access</span>
+          <div class="button-group demo-buttons">
+            <button type="button" class="cancel-btn" (click)="fillDemo('admin')">Fill Admin</button>
+            <button type="button" class="cancel-btn" (click)="fillDemo('user')">Fill User</button>
+          </div>
+        </div>
+
+      </form>
+    }
+
+    <!-- REGISTER FORM -->
+    @if (activeTabIndex === 1) {
+      <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="theme-form">
+
+        <div class="form-group">
+          <label>Username</label>
+          <input
+            type="text"
+            placeholder="Choose a username"
+            formControlName="username"
+            class="form-input"
+            [class.is-invalid]="registerForm.get('username')?.touched && registerForm.get('username')?.invalid"
+          />
+          @if (registerForm.get('username')?.touched && registerForm.get('username')?.invalid) {
+            <div class="error-text">Username invalid (3–50 chars)</div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input
+            type="password"
+            placeholder="Create a strong password"
+            formControlName="password"
+            class="form-input"
+            [class.is-invalid]="registerForm.get('password')?.touched && registerForm.get('password')?.invalid"
+          />
+          @if (registerForm.get('password')?.touched && registerForm.get('password')?.invalid) {
+            <div class="error-text">Password invalid (8–100 chars)</div>
+          }
+        </div>
+
+        <button type="submit" class="save-btn full-width" [disabled]="loading || registerForm.invalid">
+          {{ loading ? 'Loading...' : 'Create Account' }}
+        </button>
+
+      </form>
+    }
+
+  </div>
+</div>

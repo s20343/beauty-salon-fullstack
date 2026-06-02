@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { SalonService } from '../../service/salon.service';
 import { SalonDetail } from '../../model/salon.model';
+import { AuthService } from '../../service/auth.service';
 
 @Component({
   selector: 'app-salon-detail',
@@ -22,6 +23,7 @@ export class SalonDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private salonService: SalonService,
     private cdr: ChangeDetectorRef,
+    protected auth: AuthService
   ) {}
 
   ngOnInit() {

@@ -4,8 +4,34 @@
     <span class="logo-text">Warsaw Beauty Explorer</span>
   </div>
 
-  <button class="login-btn">
-    <span class="user-icon">👤</span>
-    Login
-  </button>
+  <div class="nav-right">
+    <!-- IF THE USER IS LOGGED IN -->
+    @if (auth.isLoggedIn()) {
+
+      <div class="user-info">
+        <!-- Show Role Badge -->
+        <span class="role-badge" [class.admin-badge]="auth.isAdmin()">
+          {{ auth.isAdmin() ? 'Admin' : 'User' }}
+        </span>
+
+        <!-- Show Username -->
+        <span class="username-text">
+          <span class="greeting">Hello,</span> {{ auth.username() }}
+        </span>
+      </div>
+
+      <!-- Logout Button -->
+      <button class="logout-btn" (click)="auth.logout()">
+        Logout
+      </button>
+
+    }
+    <!-- IF THE USER IS NOT LOGGED IN -->
+    @else {
+      <button class="login-btn" routerLink="/login">
+        <span class="user-icon">👤</span>
+        Login
+      </button>
+    }
+  </div>
 </header>

@@ -22,7 +22,7 @@ public class DataSeeder {
 
         return args -> {
 
-            //SEED ADMIN USER
+            // SEED ADMIN USER
             if (!userRepository.existsByUsername("admin")) {
                 User admin = User.builder()
                         .username("admin")
@@ -34,6 +34,20 @@ public class DataSeeder {
                 System.out.println("Default Admin user created: admin / admin123");
             } else {
                 System.out.println("Admin user already exists. Skipping user creation.");
+            }
+
+            // SEED NORMAL USER
+            if (!userRepository.existsByUsername("user")) {
+                User user = User.builder()
+                        .username("user")
+                        .password(passwordEncoder.encode("user123"))
+                        .role(Role.ROLE_USER) // <-- make sure this exists in enum
+                        .build();
+
+                userRepository.save(user);
+                System.out.println("Default User created: user / user123");
+            } else {
+                System.out.println("User already exists. Skipping user creation.");
             }
 
             //SEED SALONS
