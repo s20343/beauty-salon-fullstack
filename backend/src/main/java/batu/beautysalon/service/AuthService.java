@@ -37,7 +37,6 @@ public class AuthService {
     @Value("${app.jwt.refresh-token-expiration-ms}")
     private long refreshExpirationMs;
 
-    // ─── Register ─────────────────────────────────────────────────────────────
 
     @Transactional
     public AuthResponse register(RegisterRequest req) {
@@ -55,7 +54,6 @@ public class AuthService {
         return buildAuthResponse(user.getUsername());
     }
 
-    // ─── Login ────────────────────────────────────────────────────────────────
 
     @Transactional
     public AuthResponse login(LoginRequest req) {
@@ -64,8 +62,6 @@ public class AuthService {
         );
         return buildAuthResponse(req.getUsername());
     }
-
-    // ─── Refresh ──────────────────────────────────────────────────────────────
 
     @Transactional
     public TokenRefreshResponse refresh(RefreshRequest req) {
@@ -77,7 +73,6 @@ public class AuthService {
             throw new TokenRefreshException("Refresh token has expired. Please log in again.");
         }
 
-        // Rotate: delete old, issue new pair
         User user = stored.getUser();
         refreshTokenRepository.delete(stored);
 
@@ -88,16 +83,14 @@ public class AuthService {
         return TokenRefreshResponse.of(newAccessToken, newRefreshToken);
     }
 
-    // ─── Logout ───────────────────────────────────────────────────────────────
-
     @Transactional
     public void logout(String username) {
         userRepository.findByUsername(username)
                 .ifPresent(refreshTokenRepository::deleteByUser);
     }
 
-    // ─── Helpers ──────────────────────────────────────────────────────────────
 
+    //Helpers
     private AuthResponse buildAuthResponse(String username) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         String accessToken = jwtUtils.generateAccessToken(userDetails);
@@ -107,7 +100,6 @@ public class AuthService {
     }
 
     private String createRefreshToken(User user) {
-        // Delete any existing token for this user (one active refresh token per user)
         refreshTokenRepository.deleteByUser(user);
 
         RefreshToken rt = RefreshToken.builder()

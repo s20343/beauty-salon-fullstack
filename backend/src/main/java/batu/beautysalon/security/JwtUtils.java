@@ -20,14 +20,12 @@ public class JwtUtils {
     @Value("${app.jwt.access-token-expiration-ms}")
     private long accessTokenExpirationMs;
 
-    // ─── Key ──────────────────────────────────────────────────────────────────
-
+    //Key
     private SecretKey signingKey() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
-    // ─── Generate ─────────────────────────────────────────────────────────────
-
+    //Generate
     public String generateAccessToken(UserDetails userDetails) {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
@@ -38,8 +36,7 @@ public class JwtUtils {
                 .compact();
     }
 
-    // ─── Parse ────────────────────────────────────────────────────────────────
-
+    //Parse
     public String extractUsername(String token) {
         return parseClaims(token).getSubject();
     }

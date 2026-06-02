@@ -22,7 +22,7 @@ public class DataSeeder {
 
         return args -> {
 
-            // 1. --- SEED ADMIN USER ---
+            //SEED ADMIN USER
             if (!userRepository.existsByUsername("admin")) {
                 User admin = User.builder()
                         .username("admin")
@@ -31,23 +31,23 @@ public class DataSeeder {
                         .build();
 
                 userRepository.save(admin);
-                System.out.println("✅ Default Admin user created: admin / admin123");
+                System.out.println("Default Admin user created: admin / admin123");
             } else {
-                System.out.println("✅ Admin user already exists. Skipping user creation.");
+                System.out.println("Admin user already exists. Skipping user creation.");
             }
 
-            // 2. --- SEED SALONS ---
+            //SEED SALONS
             if (salonRepository.count() > 0) {
-                System.out.println("✅ Database already populated with salons. Skipping data fetch.");
+                System.out.println("Database already populated with salons. Skipping data fetch.");
                 return;
             }
 
-            System.out.println("⏳ No salon data found. Fetching real Warsaw salons from OpenStreetMap...");
+            System.out.println("No salon data found. Fetching real Warsaw salons from OpenStreetMap...");
 
             var fetchedSalons = overpassDataClient.fetchSalonsInWarsaw();
             salonRepository.saveAll(fetchedSalons);
 
-            System.out.println("✅ Successfully saved " + fetchedSalons.size() + " salons to the database!");
+            System.out.println("Successfully saved " + fetchedSalons.size() + " salons to the database!");
         };
     }
 }
