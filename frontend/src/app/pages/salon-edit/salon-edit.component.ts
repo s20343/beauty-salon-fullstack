@@ -84,5 +84,6 @@ export class SalonEditComponent implements OnInit {
         this.cdr.detectChanges(); // bug fix
       },
     });
+
   }
 }
