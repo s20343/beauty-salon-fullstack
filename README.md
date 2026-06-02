@@ -8,12 +8,14 @@ A full-stack web application for browsing and managing beauty salons in Warsaw. 
 
 - Browse 120+ real Warsaw beauty salons fetched from OpenStreetMap
 - Filter by district and service type (resolved server-side)
-- Filter by name, minimum rating, and price range (applied client-side)
+- Filter by name, minimum rating and price range (applied client-side)
 - Sort results by rating or review count
 - Real-time deduplication during data import
+- JWT authentication with access and refresh tokens
+- Role-based access control, only admins can edit salon details
+- User registration and login via dedicated frontend pages
 - Edit salon details with form validation on both frontend and backend
-- In-memory salon list cache to avoid redundant API calls when navigating
-- Unit tests for service and controller layers
+- Unit tests for service and controller layers (backend)
 
 ---
 
@@ -80,8 +82,9 @@ docker-compose up -d
 |---|---|
 | Spring Boot 3.5 | Application framework |
 | Spring Data JPA | Database access and repository layer |
-| Spring Security | CORS and security configuration |
+| Spring Security | Authentication, authorization, and CORS |
 | Spring Validation | Request body validation (`@NotBlank`, `@Pattern`) |
+| JWT | Access and refresh token implementation |
 | PostgreSQL | Relational database |
 | Flyway | Database migration management |
 | Docker | Running PostgreSQL locally |
@@ -89,13 +92,18 @@ docker-compose up -d
 | ModelMapper | Entity ↔ DTO mapping |
 | Java 17 | Language version |
 
-Standard layered architecture — `Controller → Service → Repository → Entity`. Three endpoints are exposed:
+Standard layered architecture — `Controller → Service → Repository → Entity`. Endpoints exposed:
 
-- `GET /api/salons?district=&service=` — filtered salon list
-- `GET /api/salons/{id}` — full salon detail
-- `PUT /api/salons/{id}` — update salon fields, validated with Bean Validation
+- `POST /api/auth/register` — register a new user
+- `POST /api/auth/login` — login and receive access + refresh tokens
+- `POST /api/auth/refresh` — exchange a refresh token for a new access token
+- `GET /api/salons?district=&service=` — filtered salon list (public)
+- `GET /api/salons/{id}` — full salon detail (public)
+- `PUT /api/salons/{id}` — update salon fields, admin only, validated with Bean Validation
 
-**Data collection** is handled by `OverpassDataClient`, which queries the [Overpass API](https://overpass-api.de) — a read-only OpenStreetMap API — for all nodes and ways tagged `shop=beauty` or `shop=hairdresser` within Warsaw's administrative boundary. Each result is then processed:
+**Authentication** uses JWT — on login the backend issues a short lived access token and a longer lived refresh token. The frontend attaches the access token to requests and uses the refresh token to obtain a new one when it expires. Edit endpoints are protected and reject requests from non admin users.
+
+**Data collection** is handled by `OverpassDataClient`, which queries the [Overpass API](https://overpass-api.de)  a read-only OpenStreetMap API , for all nodes and ways tagged `shop=beauty` or `shop=hairdresser` within Warsaw's administrative boundary. Each result is then processed:
 
 - Elements missing a name or coordinates are discarded
 - Duplicates are detected using a composite key of `name + rounded lat/lon (~111m precision)`, since the same salon can appear as both a node and a way in OSM
@@ -110,23 +118,19 @@ Standard layered architecture — `Controller → Service → Repository → Ent
 | Tool | Purpose |
 |---|---|
 | Angular 21 | Standalone component framework |
-| Angular Router | Client-side routing |
-| Angular Forms | Template-driven forms with validation |
-| HttpClient | REST API calls |
-| RxJS | Reactive streams and in-memory list caching |
+| Angular Router | Client-side routing and route guards |
+| Angular Signals | Reactive state management |
+| HttpClient | REST API calls with auth interceptor |
+| RxJS | Reactive streams |
 | TypeScript 5.9 | Type safety |
 
-Three pages (`SalonList`, `SalonDetail`, `SalonEdit`) and a shared `Navbar`. The service layer caches the salon list in memory to avoid redundant requests when navigating back from a detail view.
+Pages: `SalonList`, `SalonDetail`, `SalonEdit`, `Login`, `Register`, and a shared `Navbar`. The edit page is protected by a route guard that checks for an admin role — unauthenticated or non-admin users are redirected to the login page. An HTTP interceptor automatically attaches the access token to outgoing requests and handles token refresh transparently.
 
 **Filtering is split intentionally between backend and frontend.** District and service type filters hit the backend as query params — they narrow the dataset at the database level. Name search, minimum rating, and price range are applied in-memory on the frontend against the already-fetched results, keeping the interaction instant without extra API calls.
 
 ---
 
 ## What I'd Improve With More Time
-
-### Authentication & Authorization
-- JWT based login to protect edit actions
-- Role distinction between read-only users and admins
 
 ### Data
 - Replace mocked ratings and price ranges with real data from Google Places API or a user contribution model
@@ -136,11 +140,10 @@ Three pages (`SalonList`, `SalonDetail`, `SalonEdit`) and a shared `Navbar`. The
 - Add pagination to `GET /api/salons` so the API scales as the dataset grows
 
 ### Frontend
-- Migrate to Angular Signals (remove ChangeDetectorRef workarounds)
 - Persist filter state in URL query params so results are shareable and the back button restores the previous filter state
 - Add pagination to the salon list
 - Improve the Angular project structure and code readability
-
+- Migrate remaining components to Angular Signals. Currently only the auth flow uses signals, other pages still rely on `ChangeDetectorRef` workarounds
   ## TODO
-- [ ] Add authentication (JWT login)
+- [x] Add authentication (JWT login)
 - [ ] Add pagination to salon list
