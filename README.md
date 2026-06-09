@@ -117,7 +117,9 @@ Cache HIT  (subsequent requests, hits Redis):  ~18ms
 
 That is approximately a **23× speedup** on repeated identical requests. The benefit grows under concurrent load since cache hits bypass the database and connection pool entirely.
 
-**Data collection** is handled by `OverpassDataClient`, which queries the [Overpass API](https://overpass-api.de) — a read-only OpenStreetMap API — for all nodes and ways tagged `shop=beauty` or `shop=hairdresser` within Warsaw's administrative boundary. Each result is then processed:
+**Authentication** uses JWT — on login the backend issues a short lived access token and a longer lived refresh token. The frontend attaches the access token to requests and uses the refresh token to obtain a new one when it expires. Edit endpoints are protected and reject requests from non admin users.
+
+**Data collection** is handled by `OverpassDataClient`, which queries the [Overpass API](https://overpass-api.de)  a read-only OpenStreetMap API , for all nodes and ways tagged `shop=beauty` or `shop=hairdresser` within Warsaw's administrative boundary. Each result is then processed:
 
 - Elements missing a name or coordinates are discarded
 - Duplicates are detected using a composite key of `name + rounded lat/lon (~111m precision)`, since the same salon can appear as both a node and a way in OSM
