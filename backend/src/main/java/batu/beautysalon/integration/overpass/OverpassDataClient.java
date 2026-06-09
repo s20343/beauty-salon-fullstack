@@ -123,6 +123,9 @@ public class OverpassDataClient {
         return salons;
     }
 
+
+
+
     //District
     private String inferDistrict(Map<String, String> tags, Double lat, Double lon) {
 
@@ -195,7 +198,7 @@ public class OverpassDataClient {
         if (services.isEmpty()) {
             services.add("Beauty Treatments");
         }
-        return String.join(", ", services);
+        return String.join("| ", services);
     }
 
     //Address builder

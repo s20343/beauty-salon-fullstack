@@ -8,12 +8,15 @@ A full-stack web application for browsing and managing beauty salons in Warsaw. 
 
 - Browse 120+ real Warsaw beauty salons fetched from OpenStreetMap
 - Filter by district and service type (resolved server-side)
-- Filter by name, minimum rating, and price range (applied client-side)
+- Filter by name, minimum rating and price range (applied client-side)
 - Sort results by rating or review count
 - Real-time deduplication during data import
+- Server-side Redis caching
+- JWT authentication with access and refresh tokens
+- Role based access control, only admins can edit salon details
+- User registration and login via dedicated frontend pages
 - Edit salon details with form validation on both frontend and backend
-- In-memory salon list cache to avoid redundant API calls when navigating
-- Unit tests for service and controller layers
+- Unit tests for service and controller layers (backend)
 
 ---
 
@@ -26,13 +29,13 @@ A full-stack web application for browsing and managing beauty salons in Warsaw. 
 - Docker and Docker Compose
 - Internet connection on first startup (required for the Overpass API data fetch)
 
-### 1. Start the database
+### 1. Start the database and Redis
 
 ```bash
 docker-compose up -d
 ```
 
-This starts a PostgreSQL instance locally. Data persists across restarts.
+This starts a PostgreSQL instance and a Redis instance locally. Data persists across restarts.
 
 ### 2. Start the backend
 
@@ -80,20 +83,39 @@ docker-compose up -d
 |---|---|
 | Spring Boot 3.5 | Application framework |
 | Spring Data JPA | Database access and repository layer |
-| Spring Security | CORS and security configuration |
+| Spring Security | Authentication, authorization, and CORS |
 | Spring Validation | Request body validation (`@NotBlank`, `@Pattern`) |
+| Spring Cache + Redis | Server-side response caching |
+| JWT | Access and refresh token implementation |
 | PostgreSQL | Relational database |
+| Redis | Cache store — 5-minute TTL, evicted on writes |
 | Flyway | Database migration management |
-| Docker | Running PostgreSQL locally |
+| Docker | Running PostgreSQL and Redis locally |
 | Lombok | Reduces boilerplate |
 | ModelMapper | Entity ↔ DTO mapping |
 | Java 17 | Language version |
 
-Standard layered architecture — `Controller → Service → Repository → Entity`. Three endpoints are exposed:
+Standard layered architecture — `Controller → Service → Repository → Entity`. Endpoints exposed:
 
-- `GET /api/salons?district=&service=` — filtered salon list
-- `GET /api/salons/{id}` — full salon detail
-- `PUT /api/salons/{id}` — update salon fields, validated with Bean Validation
+- `POST /api/auth/register` — register a new user
+- `POST /api/auth/login` — login and receive access + refresh tokens
+- `POST /api/auth/refresh` — exchange a refresh token for a new access token
+- `GET /api/salons?district=&service=&page=&size=` — paginated and filtered salon list (public)
+- `GET /api/salons/{id}` — full salon detail (public)
+- `PUT /api/salons/{id}` — update salon fields, admin only, validated with Bean Validation
+
+**Authentication** uses JWT — on login the backend issues a short-lived access token and a longer-lived refresh token. The frontend attaches the access token to requests and uses the refresh token to obtain a new one when it expires. Edit endpoints are protected and reject requests from non-admin users.
+
+**Caching** is implemented with Spring Cache backed by Redis. `GET /api/salons` and `GET /api/salons/{id}` responses are cached with a 5-minute TTL. Cache keys include the filter parameters (`district`, `service`, `page`, `size`) so each unique query combination is cached independently. Any `PUT /api/salons/{id}` call evicts all cached salon entries so subsequent reads reflect the update immediately.
+
+Measured on the same machine with 120 salons in the database:
+
+```
+Cache MISS (first request, hits PostgreSQL):  ~415ms
+Cache HIT  (subsequent requests, hits Redis):  ~18ms
+```
+
+That is approximately a **23× speedup** on repeated identical requests. The benefit grows under concurrent load since cache hits bypass the database and connection pool entirely.
 
 **Data collection** is handled by `OverpassDataClient`, which queries the [Overpass API](https://overpass-api.de) — a read-only OpenStreetMap API — for all nodes and ways tagged `shop=beauty` or `shop=hairdresser` within Warsaw's administrative boundary. Each result is then processed:
 
@@ -110,37 +132,38 @@ Standard layered architecture — `Controller → Service → Repository → Ent
 | Tool | Purpose |
 |---|---|
 | Angular 21 | Standalone component framework |
-| Angular Router | Client-side routing |
-| Angular Forms | Template-driven forms with validation |
-| HttpClient | REST API calls |
-| RxJS | Reactive streams and in-memory list caching |
+| Angular Router | Client-side routing and route guards |
+| Angular Signals | Reactive state management for auth |
+| HttpClient | REST API calls with auth interceptor |
+| RxJS | Reactive streams |
 | TypeScript 5.9 | Type safety |
 
-Three pages (`SalonList`, `SalonDetail`, `SalonEdit`) and a shared `Navbar`. The service layer caches the salon list in memory to avoid redundant requests when navigating back from a detail view.
+Pages: `SalonList`, `SalonDetail`, `SalonEdit`, `Login`, `Register`, and a shared `Navbar`. The edit page is protected by a route guard that checks for an admin role — unauthenticated or non-admin users are redirected to the login page. An HTTP interceptor automatically attaches the access token to outgoing requests and handles token refresh transparently.
 
-**Filtering is split intentionally between backend and frontend.** District and service type filters hit the backend as query params — they narrow the dataset at the database level. Name search, minimum rating, and price range are applied in-memory on the frontend against the already-fetched results, keeping the interaction instant without extra API calls.
+**Filtering is split intentionally between backend and frontend.** District and service type filters are sent to the backend as query parameters — they narrow the dataset at the database level and benefit from caching. Name search, minimum rating, and price range are applied in-memory on the frontend against the already-fetched page, keeping interaction instant without extra API calls.
 
 ---
 
 ## What I'd Improve With More Time
 
-### Authentication & Authorization
-- JWT based login to protect edit actions
-- Role distinction between read-only users and admins
-
 ### Data
-- Replace mocked ratings and price ranges with real data from Google Places API or a user contribution model
+- Replace mocked ratings and price ranges with real data from Google Places API 
 - Cache the Overpass response to a file so the app can start without depending on the external API being available
 
 ### Backend
+- Add optimistic locking (`@Version`) on `Salon` to prevent lost updates when two admins edit the same salon simultaneously
 - Add pagination to `GET /api/salons` so the API scales as the dataset grows
 
 ### Frontend
-- Migrate to Angular Signals (remove ChangeDetectorRef workarounds)
-- Persist filter state in URL query params so results are shareable and the back button restores the previous filter state
-- Add pagination to the salon list
+- Persist filter and page state in URL query params so results are shareable and the browser back button restores the previous view
+- Migrate remaining components from `ChangeDetectorRef` workarounds to Angular Signals
 - Improve the Angular project structure and code readability
 
-  ## TODO
-- [ ] Add authentication (JWT login)
+---
+
+## TODO
+
+- [x] Add authentication (JWT login)
+- [x] Add Redis caching to `GET /api/salons` and `GET /api/salons/{id}`
 - [ ] Add pagination to salon list
+- [ ] Add optimistic locking (`@Version`) to prevent lost updates

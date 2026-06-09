@@ -72,6 +72,7 @@ export class SalonEditComponent implements OnInit {
     this.salonService.updateSalon(this.salonId, payload).subscribe({
       next: () => {
         this.router.navigate(['/salons', this.salonId]);
+        this.cdr.detectChanges(); // bug fix
       },
       error: (err) => {
         this.isSaving = false;
@@ -84,6 +85,5 @@ export class SalonEditComponent implements OnInit {
         this.cdr.detectChanges(); // bug fix
       },
     });
-
   }
 }

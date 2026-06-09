@@ -7,13 +7,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SalonRequestDto {
+public class SalonRequestDto implements Serializable {
 
     @NotBlank(message = "Name cannot be blank")
     private String name;

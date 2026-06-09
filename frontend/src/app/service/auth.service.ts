@@ -20,7 +20,9 @@ export class AuthService {
   private readonly apiUrl = `${environment.apiUrl}/auth`;
 
   //signal
-  private _currentUser = signal<AuthUser | null>(this.loadStoredUser());
+  private _currentUser = signal<AuthUser | null>(
+    this.hasValidToken() ? this.loadStoredUser() : this.clearAndReturnNull(),
+  );
   readonly currentUser = this._currentUser.asReadonly();
   readonly isLoggedIn = computed(() => this._currentUser() !== null);
   readonly isAdmin = computed(() => this._currentUser()?.role === 'ROLE_ADMIN');
@@ -108,5 +110,12 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  private clearAndReturnNull(): null {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+    return null;
   }
 }

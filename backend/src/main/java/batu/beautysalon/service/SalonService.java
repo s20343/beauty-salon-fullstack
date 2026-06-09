@@ -6,7 +6,10 @@ import batu.beautysalon.dto.SalonSummaryDto;
 import batu.beautysalon.mapper.SalonMapper;
 import batu.beautysalon.model.Salon;
 import batu.beautysalon.repository.SalonRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,6 +25,7 @@ public class SalonService {
         this.salonMapper = salonMapper;
     }
 
+    @Cacheable(value = "salons", key = "#district + '-' + #service")
     public List<SalonSummaryDto> getAllSalons(String district, String service) {
         List<Salon> salons;
 
@@ -45,11 +49,14 @@ public class SalonService {
                 .collect(Collectors.toList());
     }
 
+
+
+    @Cacheable(value = "salon", key = "#id")
     public Optional<SalonDetailDto> getSalonById(Long id) {
-        return salonRepository.findById(id)
-                .map(salonMapper::toDetailDto);
+        return salonRepository.findById(id).map(salonMapper::toDetailDto);
     }
 
+    @CacheEvict(value = {"salons", "salon"}, allEntries = true)
     public Optional<SalonDetailDto> updateSalon(Long id, SalonRequestDto requestDto) {
         return salonRepository.findById(id).map(existingSalon -> {
             salonMapper.updateEntityFromDto(requestDto, existingSalon);

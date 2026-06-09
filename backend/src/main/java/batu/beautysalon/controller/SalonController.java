@@ -7,11 +7,12 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/salons")
-@CrossOrigin(origins = "*")
 public class SalonController {
 
     private final SalonService salonService;
@@ -33,7 +34,7 @@ public class SalonController {
     public ResponseEntity<SalonDetailDto> getSalonById(@PathVariable Long salonId) {
         return salonService.getSalonById(salonId)
                 .map(dto -> new ResponseEntity<>(dto, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"Salon with ID " + salonId + " was not found."));
     }
 
     @PutMapping("/{salonId}")
