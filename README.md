@@ -100,13 +100,15 @@ Standard layered architecture — `Controller → Service → Repository → Ent
 - `POST /api/auth/register` — register a new user
 - `POST /api/auth/login` — login and receive access + refresh tokens
 - `POST /api/auth/refresh` — exchange a refresh token for a new access token
-- `GET /api/salons?district=&service=&page=&size=` — paginated and filtered salon list (public)
+- `GET /api/salons?district=&service=` — filtered salon list (public)
 - `GET /api/salons/{id}` — full salon detail (public)
 - `PUT /api/salons/{id}` — update salon fields, admin only, validated with Bean Validation
+- `POST /api/salons` — create a salon, admin only, validated with Bean Validation
+- `DELETE /api/salons/{id}` — delete a salon, admin only
 
 **Authentication** uses JWT — on login the backend issues a short-lived access token and a longer-lived refresh token. The frontend attaches the access token to requests and uses the refresh token to obtain a new one when it expires. Edit endpoints are protected and reject requests from non-admin users.
 
-**Caching** is implemented with Spring Cache backed by Redis. `GET /api/salons` and `GET /api/salons/{id}` responses are cached with a 5-minute TTL. Cache keys include the filter parameters (`district`, `service`, `page`, `size`) so each unique query combination is cached independently. Any `PUT /api/salons/{id}` call evicts all cached salon entries so subsequent reads reflect the update immediately.
+**Caching** is implemented with Spring Cache backed by Redis. `GET /api/salons` and `GET /api/salons/{id}` responses are cached with a 5-minute TTL. Cache keys include the filter parameters (`district`, `service`) so each unique query combination is cached independently. Any salon write operation (`POST`, `PUT`, or `DELETE`) evicts cached salon entries so subsequent reads reflect the latest data.
 
 Measured on the same machine with 120 salons in the database:
 
@@ -142,7 +144,7 @@ That is approximately a **23× speedup** on repeated identical requests. The ben
 
 Pages: `SalonList`, `SalonDetail`, `SalonEdit`, `Login`, `Register`, and a shared `Navbar`. The edit page is protected by a route guard that checks for an admin role — unauthenticated or non-admin users are redirected to the login page. An HTTP interceptor automatically attaches the access token to outgoing requests and handles token refresh transparently.
 
-**Filtering is split intentionally between backend and frontend.** District and service type filters are sent to the backend as query parameters — they narrow the dataset at the database level and benefit from caching. Name search, minimum rating, and price range are applied in-memory on the frontend against the already-fetched page, keeping interaction instant without extra API calls.
+**Filtering is split intentionally between backend and frontend.** District and service type filters are sent to the backend as query parameters — they narrow the dataset at the database level and benefit from caching. Name search, minimum rating, and price range are applied in-memory on the frontend against the already-fetched results, keeping interaction instant without extra API calls.
 
 ---
 
@@ -154,10 +156,9 @@ Pages: `SalonList`, `SalonDetail`, `SalonEdit`, `Login`, `Register`, and a share
 
 ### Backend
 - Add optimistic locking (`@Version`) on `Salon` to prevent lost updates when two admins edit the same salon simultaneously
-- Add pagination to `GET /api/salons` so the API scales as the dataset grows
 
 ### Frontend
-- Persist filter and page state in URL query params so results are shareable and the browser back button restores the previous view
+- Persist filter state in URL query params so results are shareable and the browser back button restores the previous view
 - Migrate remaining components from `ChangeDetectorRef` workarounds to Angular Signals
 - Improve the Angular project structure and code readability
 
