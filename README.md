@@ -1,57 +1,76 @@
 # Warsaw Beauty Explorer
 
-A full-stack web application for browsing and managing beauty salons in Warsaw. Real salon data is fetched from OpenStreetMap on startup and served through a REST API to an Angular frontend.
+A full-stack web application for browsing and managing beauty salons in Warsaw. Real salon data is fetched from OpenStreetMap through the Overpass API, stored in PostgreSQL, cached with Redis, and served to an Angular frontend.
 
 ---
 
 ## Features
 
 - Browse 120+ real Warsaw beauty salons fetched from OpenStreetMap
-- Filter by district and service type (resolved server-side)
-- Filter by name, minimum rating and price range (applied client-side)
+- Filter by district and service type on the backend
+- Filter by name, minimum rating, and price range on the frontend
 - Sort results by rating or review count
 - Real-time deduplication during data import
+- Last-successful salon snapshot fallback when Overpass is unavailable
 - Server-side Redis caching
 - JWT authentication with access and refresh tokens
-- Role based access control, only admins can edit salon details
+- Role-based access control: only admins can create, update, or delete salon details
 - User registration and login via dedicated frontend pages
 - Edit salon details with form validation on both frontend and backend
-- Unit tests for service and controller layers (backend)
+- Unit tests for service and controller layers
 
 ---
 
-## How to Run
+## How To Run
 
 ### Prerequisites
 
 - Java 17+
 - Node.js 18+ and npm 10+
 - Docker and Docker Compose
-- Internet connection on first startup (required for the Overpass API data fetch)
+- Internet connection for fresh Overpass imports. If a previous snapshot exists, the backend can restore salon data from that snapshot when Overpass is unavailable.
 
-### 1. Start the database and Redis
+### 1. Start PostgreSQL and Redis
 
 ```bash
 docker-compose up -d
 ```
 
-This starts a PostgreSQL instance and a Redis instance locally. Data persists across restarts.
+This starts PostgreSQL and Redis locally. Database data persists across restarts unless volumes are removed.
 
 ### 2. Start the backend
 
+From the repository root:
+
 ```bash
-cd backend
-./mvnw spring-boot:run
+./backend/mvnw -f backend/pom.xml spring-boot:run
 ```
 
-The backend starts on `http://localhost:8080`. On first startup Flyway runs the database migration, then the app fetches live salon data from the Overpass API and seeds the database. You will see this in the console when ready:
+On Windows PowerShell:
 
+```powershell
+.\backend\mvnw.cmd -f backend\pom.xml spring-boot:run
 ```
+
+The backend starts on `http://localhost:8080`. On first startup Flyway runs the database migrations, then the app fetches live salon data from Overpass and seeds the database.
+
+Example successful import logs:
+
+```text
 Fetched 120 unique salons from OpenStreetMap.
-Successfully saved 120 salons to the database!
+Saved 120 salons from Overpass. Snapshot saved.
 ```
 
-On subsequent restarts the fetch is skipped since the data is already in the database.
+A successful import also writes a generated last-known-good snapshot to:
+
+```text
+backend/data/salons_snapshot.json
+```
+
+On later restarts:
+
+- If normal salon data already exists, the backend skips the fetch.
+- If the database was restored from a snapshot fallback, the backend keeps serving that data but retries Overpass on startup.
 
 ### 3. Start the frontend
 
@@ -65,108 +84,189 @@ The frontend starts on `http://localhost:4200`.
 
 ### Resetting data
 
-To wipe the database and re-fetch fresh data from Overpass:
+To wipe PostgreSQL data and re-fetch fresh data from Overpass:
 
 ```bash
 docker-compose down -v
 docker-compose up -d
-./mvnw spring-boot:run
+./backend/mvnw -f backend/pom.xml spring-boot:run
 ```
+
+If Overpass is unavailable after a reset, the backend tries to restore from:
+
+```text
+backend/data/salons_snapshot.json
+```
+
+When snapshot data is restored, the app creates:
+
+```text
+backend/data/salons_snapshot_restored.flag
+```
+
+On the next startup, that marker tells the app to retry Overpass and replace the snapshot-restored data with fresh imported data when possible.
 
 ---
 
 ## Technical Solution
 
-### Backend — Spring Boot
+### Backend - Spring Boot
 
 | Tool | Purpose |
 |---|---|
 | Spring Boot 3.5 | Application framework |
-| Spring Data JPA | Database access and repository layer |
-| Spring Security | Authentication, authorization, and CORS |
-| Spring Validation | Request body validation (`@NotBlank`, `@Pattern`) |
-| Spring Cache + Redis | Server-side response caching |
-| JWT | Access and refresh token implementation |
-| PostgreSQL | Relational database |
-| Redis | Cache store — 5-minute TTL, evicted on writes |
-| Flyway | Database migration management |
-| Docker | Running PostgreSQL and Redis locally |
-| Lombok | Reduces boilerplate |
-| ModelMapper | Entity ↔ DTO mapping |
 | Java 17 | Language version |
+| Spring Web | REST API |
+| Spring Data JPA | Database access and repository layer |
+| PostgreSQL | Main relational database |
+| Flyway | Versioned database migrations |
+| Spring Validation | Request body validation |
+| Spring Security | Authentication, authorization, and CORS |
+| JWT | Access and refresh token implementation |
+| Spring Cache + Redis | Server-side response caching |
+| Redis | Cache store with 5-minute TTL |
+| RestTemplate | Overpass HTTP client with connect/read timeouts |
+| Lombok | Reduces boilerplate |
+| ModelMapper | Entity/DTO mapping |
+| Docker Compose | Local PostgreSQL and Redis runtime |
 
-Standard layered architecture — `Controller → Service → Repository → Entity`. Endpoints exposed:
+The backend follows a standard layered architecture:
 
-- `POST /api/auth/register` — register a new user
-- `POST /api/auth/login` — login and receive access + refresh tokens
-- `POST /api/auth/refresh` — exchange a refresh token for a new access token
-- `GET /api/salons?district=&service=` — filtered salon list (public)
-- `GET /api/salons/{id}` — full salon detail (public)
-- `PUT /api/salons/{id}` — update salon fields, admin only, validated with Bean Validation
-- `POST /api/salons` — create a salon, admin only, validated with Bean Validation
-- `DELETE /api/salons/{id}` — delete a salon, admin only
-
-**Authentication** uses JWT — on login the backend issues a short-lived access token and a longer-lived refresh token. The frontend attaches the access token to requests and uses the refresh token to obtain a new one when it expires. Edit endpoints are protected and reject requests from non-admin users.
-
-**Caching** is implemented with Spring Cache backed by Redis. `GET /api/salons` and `GET /api/salons/{id}` responses are cached with a 5-minute TTL. Cache keys include the filter parameters (`district`, `service`) so each unique query combination is cached independently. Any salon write operation (`POST`, `PUT`, or `DELETE`) evicts cached salon entries so subsequent reads reflect the latest data.
-
-Measured on the same machine with 120 salons in the database:
-
+```text
+Controller -> Service -> Repository -> Entity
 ```
+
+### API Endpoints
+
+- `POST /api/auth/register` - register a new user
+- `POST /api/auth/login` - login and receive access + refresh tokens
+- `POST /api/auth/refresh` - exchange a refresh token for a new access token
+- `GET /api/salons?district=&service=` - filtered salon list, public
+- `GET /api/salons/{id}` - full salon detail, public
+- `PUT /api/salons/{id}` - update salon fields, admin only
+- `POST /api/salons` - create a salon, admin only
+- `DELETE /api/salons/{id}` - delete a salon, admin only
+
+### Authentication
+
+Authentication uses JWT. On login, the backend issues a short-lived access token and a longer-lived refresh token. The frontend attaches the access token to API requests and uses the refresh token to obtain a new access token when needed. Salon write endpoints are protected and reject non-admin users.
+
+Access tokens are not stored in the database. Refresh tokens are stored in PostgreSQL so they can be expired, rotated, and revoked.
+
+### Caching
+
+Caching is implemented with Spring Cache backed by Redis. `GET /api/salons` and `GET /api/salons/{id}` responses are cached with a 5-minute TTL. Cache keys include the filter parameters `district` and `service`. Any salon write operation (`POST`, `PUT`, or `DELETE`) evicts cached salon entries so subsequent reads reflect the latest data.
+
+Measured locally with 120 salons:
+
+```text
 Cache MISS (first request, hits PostgreSQL):  ~415ms
-Cache HIT  (subsequent requests, hits Redis):  ~18ms
+Cache HIT  (subsequent request, hits Redis):  ~18ms
 ```
 
-That is approximately a **23× speedup** on repeated identical requests. The benefit grows under concurrent load since cache hits bypass the database and connection pool entirely.
+That is approximately a 23x speedup on repeated identical requests.
 
-**Authentication** uses JWT — on login the backend issues a short lived access token and a longer lived refresh token. The frontend attaches the access token to requests and uses the refresh token to obtain a new one when it expires. Edit endpoints are protected and reject requests from non admin users.
+### Data Collection
 
-**Data collection** is handled by `OverpassDataClient`, which queries the [Overpass API](https://overpass-api.de)  a read-only OpenStreetMap API , for all nodes and ways tagged `shop=beauty` or `shop=hairdresser` within Warsaw's administrative boundary. Each result is then processed:
+Data collection is handled by `OverpassDataClient`. It queries the Overpass API, a read-only OpenStreetMap API, for all nodes and ways tagged `shop=beauty` or `shop=hairdresser` inside Warsaw's administrative boundary.
+
+This is similar to a small ETL pipeline:
+
+- Extract raw OSM elements from Overpass
+- Transform messy OSM tags into the local `Salon` model
+- Load cleaned salon records into PostgreSQL
+
+During transformation:
 
 - Elements missing a name or coordinates are discarded
-- Duplicates are detected using a composite key of `name + rounded lat/lon (~111m precision)`, since the same salon can appear as both a node and a way in OSM
-- District is resolved from OSM address tags first; if missing, inferred by matching coordinates against hardcoded bounding boxes for all 18 Warsaw districts
-- Services are parsed from the `shop` and `beauty` OSM tags and mapped to human-readable names
-- Address is assembled from individual OSM address tags (`addr:street`, `addr:housenumber`, etc.)
+- Duplicates are detected using normalized `name + rounded lat/lon`
+- Node coordinates use `lat/lon`; way coordinates use the Overpass `center`
+- District is resolved from OSM tags first, then inferred from coordinate bounding boxes
+- Services are parsed from `shop`, `beauty`, `colour/color`, and related OSM tags
+- Address is assembled from `addr:street`, `addr:housenumber`, `addr:postcode`, and `addr:city`
+- Phone and website are read from both direct and `contact:*` tags
 
-**Note on mock data:** The Overpass API does not provide ratings, review counts, or price ranges. These fields are randomly generated at import time (rating: 3.5–5.0, reviews: 5–300, price range: random enum value) purely for demonstration purposes and would be replaced with real data in production.
+The Overpass HTTP client has:
 
-### Frontend — Angular 21
+- 5-second connect timeout
+- 20-second read timeout
+
+This prevents startup from waiting indefinitely on the external API.
+
+### Snapshot Fallback
+
+After a successful Overpass import, `SalonSnapshotService` saves a generated snapshot of the transformed salon data to:
+
+```text
+backend/data/salons_snapshot.json
+```
+
+The snapshot intentionally omits database-generated fields such as `id`, `createdAt`, and `updatedAt`, so PostgreSQL can generate fresh values when the snapshot is restored.
+
+If the database is empty and Overpass fails or returns no salons, the backend loads the snapshot and marks the database as snapshot-restored with:
+
+```text
+backend/data/salons_snapshot_restored.flag
+```
+
+On the next startup, if that marker exists, the app tries Overpass again and replaces the snapshot-restored data with fresh imported data when possible.
+
+### Note On Mock Data
+
+The Overpass API does not provide ratings, review counts, or price ranges. These fields are randomly generated at import time for demonstration purposes:
+
+- rating: 3.5 to 5.0
+- reviews: 5 to 300
+- price range: random enum value
+
+In production, these fields would be removed or replaced with data from a trusted licensed source.
+
+### Frontend - Angular 21
 
 | Tool | Purpose |
 |---|---|
 | Angular 21 | Standalone component framework |
 | Angular Router | Client-side routing and route guards |
-| Angular Signals | Reactive state management for auth |
+| Angular Signals | Reactive auth state |
 | HttpClient | REST API calls with auth interceptor |
 | RxJS | Reactive streams |
 | TypeScript 5.9 | Type safety |
 
-Pages: `SalonList`, `SalonDetail`, `SalonEdit`, `Login`, `Register`, and a shared `Navbar`. The edit page is protected by a route guard that checks for an admin role — unauthenticated or non-admin users are redirected to the login page. An HTTP interceptor automatically attaches the access token to outgoing requests and handles token refresh transparently.
+Pages include `SalonList`, `SalonDetail`, `SalonEdit`, `Login`, and a shared `Navbar`.
 
-**Filtering is split intentionally between backend and frontend.** District and service type filters are sent to the backend as query parameters — they narrow the dataset at the database level and benefit from caching. Name search, minimum rating, and price range are applied in-memory on the frontend against the already-fetched results, keeping interaction instant without extra API calls.
+Filtering is split intentionally:
+
+- District and service filters are sent to the backend as query parameters.
+- Name search, minimum rating, price range, and sorting are applied on the frontend against the already-fetched results.
 
 ---
 
 ## What I'd Improve With More Time
 
 ### Data
-- Replace mocked ratings and price ranges with real data from Google Places API 
-- Cache the Overpass response to a file so the app can start without depending on the external API being available
+
+- Replace mocked ratings and price ranges with real data from a trusted source
+- Store raw Overpass responses and import status in the database for better auditability and reprocessing
+- Replace bounding boxes with official Warsaw district polygons or PostGIS
+- Add stronger fuzzy duplicate detection using name, address, phone, website, and distance
 
 ### Backend
+
 - Add optimistic locking (`@Version`) on `Salon` to prevent lost updates when two admins edit the same salon simultaneously
 
 ### Frontend
-- Persist filter state in URL query params so results are shareable and the browser back button restores the previous view
-- Migrate remaining components from `ChangeDetectorRef` workarounds to Angular Signals
+
+- Persist filter state in URL query params so results are shareable
+- Migrate remaining `ChangeDetectorRef` workarounds to cleaner Angular state handling
 - Improve the Angular project structure and code readability
 
 ---
 
 ## TODO
 
-- [x] Add authentication (JWT login)
+- [x] Add authentication with JWT login
 - [x] Add Redis caching to `GET /api/salons` and `GET /api/salons/{id}`
+- [x] Add admin-only create, update, and delete endpoints
+- [x] Add generated salon snapshot fallback for Overpass failures
 - [ ] Add pagination to salon list
 - [ ] Add optimistic locking (`@Version`) to prevent lost updates
