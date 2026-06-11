@@ -9,8 +9,12 @@ import java.util.*;
 @Component
 public class OverpassDataClient {
 
-    private final RestTemplate restTemplate = new RestTemplate();
     private final Random random = new Random();
+    private final RestTemplate restTemplate;
+
+    public OverpassDataClient(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     //District bounding boxes
     private static final List<DistrictBounds> DISTRICTS = List.of(
