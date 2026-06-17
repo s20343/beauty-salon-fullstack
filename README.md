@@ -144,8 +144,7 @@ Controller -> Service -> Repository -> Entity
 - `GET /api/salons?district=&service=` - filtered salon list, public
 - `GET /api/salons/{id}` - full salon detail, public
 - `PUT /api/salons/{id}` - update salon fields, admin only
-- `POST /api/salons` - create a salon, admin only
-- `DELETE /api/salons/{id}` - delete a salon, admin only
+
 
 ### Authentication
 
@@ -155,7 +154,7 @@ Access tokens are not stored in the database. Refresh tokens are stored in Postg
 
 ### Caching
 
-Caching is implemented with Spring Cache backed by Redis. `GET /api/salons` and `GET /api/salons/{id}` responses are cached with a 5-minute TTL. Cache keys include the filter parameters `district` and `service`. Any salon write operation (`POST`, `PUT`, or `DELETE`) evicts cached salon entries so subsequent reads reflect the latest data.
+Caching is implemented with Spring Cache backed by Redis. `GET /api/salons` and `GET /api/salons/{id}` responses are cached with a 5-minute TTL. Cache keys include the filter parameters `district` and `service`. Any salon write operation (`PUT`) evicts cached salon entries so subsequent reads reflect the latest data.
 
 Measured locally with 120 salons:
 
@@ -244,21 +243,20 @@ Filtering is split intentionally:
 ## What I'd Improve With More Time
 
 ### Data
-
 - Replace mocked ratings and price ranges with real data from a trusted source
-- Store raw Overpass responses and import status in the database for better auditability and reprocessing
-- Replace bounding boxes with official Warsaw district polygons or PostGIS
-- Add stronger fuzzy duplicate detection using name, address, phone, website, and distance
 
 ### Backend
 
-- Add optimistic locking (`@Version`) on `Salon` to prevent lost updates when two admins edit the same salon simultaneously
+- Add optimistic locking 
+- Add pagination to salon list
+- Normalize `servicesOffered` into a separate services
+- Add database indexes for common filters such as district and service
 
 ### Frontend
 
-- Persist filter state in URL query params so results are shareable
 - Migrate remaining `ChangeDetectorRef` workarounds to cleaner Angular state handling
 - Improve the Angular project structure and code readability
+- Replace basic `alert()` error handling with inline validation messages 
 
 ---
 
