@@ -14,7 +14,7 @@ A full-stack web application for browsing and managing beauty salons in Warsaw. 
 - Last-successful salon snapshot fallback when Overpass is unavailable
 - Server-side Redis caching
 - JWT authentication with access and refresh tokens
-- Role-based access control: only admins can create, update, or delete salon details
+- Role-based access control: only admins can update salon details
 - User registration and login via dedicated frontend pages
 - Edit salon details with form validation on both frontend and backend
 - Unit tests for service and controller layers
